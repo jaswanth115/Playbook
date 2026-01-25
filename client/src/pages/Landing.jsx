@@ -11,37 +11,31 @@ const Landing = () => {
           Playbook
         </h1>
         <p className="text-secondary max-w-md mx-auto text-lg">
-          The ultimate trade posting platform for UTA students. Track, analyze, and learn from top trades.
+          Discover trending trades.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-        <div className="p-8 bg-card rounded-3xl border border-white/10 space-y-4 text-center">
-          <h3 className="text-xl font-bold">New Here?</h3>
-          <p className="text-sm text-secondary">Join the UTA trading community and level up your strategy.</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-w-2xl">
+        <div className="p-8 rounded-3xl space-y-4 text-center">
           <button 
             onClick={() => navigate('/signup')}
-            className="w-full py-4 bg-white/10 hover:bg-white text-dark rounded-2xl font-black transition-all"
           >
-            Create Account
+            Sign up
           </button>
         </div>
-        <div className="p-8 bg-card rounded-3xl border border-white/10 space-y-4 text-center">
-          <h3 className="text-xl font-bold">Welcome Back</h3>
-          <p className="text-sm text-secondary">Sign in to check latest trades and performance.</p>
+        <div className="p-8 rounded-3xl space-y-4 text-center">
           <button 
             onClick={() => navigate('/login')}
-            className="w-full py-4 bg-accent-cyan/20 hover:bg-accent-cyan text-white rounded-2xl font-black border border-accent-cyan/30 transition-all"
           >
-            Sign In
+            Sign in
           </button>
         </div>
       </div>
 
-      <div className="pt-12 flex gap-12 text-secondary text-sm">
-        <div className="text-center"><p className="text-white font-bold text-2xl">130K</p><p>Students</p></div>
-        <div className="text-center"><p className="text-white font-bold text-2xl">$2.4M</p><p>Volume</p></div>
-        <div className="text-center"><p className="text-white font-bold text-2xl">15k+</p><p>Trades</p></div>
+      <div className="mt-auto text-center text-xs text-gray-400 max-w-3xl">
+        Disclaimer: This platform does not force, encourage, or require any user to trade stocks.
+        All trade ideas are for informational purposes only and should not be considered financial advice.
+        Users are solely responsible for their own investment decisions.
       </div>
     </div>
   );

@@ -5,10 +5,9 @@ import Signup from './pages/Signup';
 import Home from './pages/Home';
 import Landing from './pages/Landing';
 import ForgotPassword from './pages/ForgotPassword';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const isAuthenticated = !!localStorage.getItem('token');
-
   return (
     <Router>
       <Routes>
@@ -18,7 +17,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route 
           path="/home" 
-          element={isAuthenticated ? <Home /> : <Navigate to="/login" />} 
+          element={<ProtectedRoute><Home /></ProtectedRoute>} 
         />
       </Routes>
     </Router>
