@@ -1,77 +1,57 @@
-import React, { useEffect, useState } from 'react';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import api from '../api';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import React, { useEffect, useRef } from 'react';
 
 const StockChart = ({ symbol, onClose }) => {
-  const [chartData, setChartData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const container = useRef();
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const { data } = await api.get(`/trades/history/${symbol}`);
-        const labels = data.map(d => new Date(d.date).toLocaleDateString());
-        const prices = data.map(d => d.close);
+    // Only load the script if it hasn't been loaded already
+    const scriptId = 'tradingview-widget-script';
+    let script = document.getElementById(scriptId);
 
-        setChartData({
-          labels,
-          datasets: [
-            {
-              label: `${symbol} Price`,
-              data: prices,
-              borderColor: '#00f2fe',
-              backgroundColor: 'rgba(0, 242, 254, 0.2)',
-              fill: true,
-              tension: 0.4,
-            },
-          ],
+    if (!script) {
+      script = document.createElement('script');
+      script.id = scriptId;
+      script.src = 'https://s3.tradingview.com/tv.js';
+      script.async = true;
+      script.onload = () => createWidget();
+      document.head.appendChild(script);
+    } else {
+      createWidget();
+    }
+
+    function createWidget() {
+      if (window.TradingView && container.current) {
+        new window.TradingView.widget({
+          "autosize": true,
+          "symbol": `NASDAQ:${symbol}`, // Most UTA students track tech, common to use NASDAQ
+          "interval": "D",
+          "timezone": "Etc/UTC",
+          "theme": "dark",
+          "style": "1",
+          "locale": "en",
+          "toolbar_bg": "#f1f3f6",
+          "enable_publishing": false,
+          "allow_symbol_change": true,
+          "container_id": "tradingview_chart",
+          "backgroundColor": "rgba(0, 0, 0, 1)",
+          "gridColor": "rgba(255, 255, 255, 0.05)",
+          "hide_side_toolbar": false,
         });
-        setLoading(false);
-      } catch (err) {
-        console.error('Failed to fetch stock history', err);
-        setLoading(false);
       }
-    };
-    fetchHistory();
+    }
   }, [symbol]);
-
-  if (loading) return <div className="text-white text-center p-10">Loading chart...</div>;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-card w-full max-w-4xl p-6 rounded-2xl border border-white/10 relative">
+      <div className="w-full max-w-6xl h-[80vh] bg-[#0a0a0a] p-6 rounded-2xl relative border border-white/10 shadow-2xl">
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 text-secondary hover:text-white"
+          className="absolute -top-12 right-0 text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all flex items-center gap-2 px-4"
         >
-          ✕
+          ✕ Close Graph
         </button>
-        <h3 className="text-xl font-bold mb-4 text-primary">{symbol} Live Graph</h3>
-        {chartData ? (
-          <Line data={chartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
-        ) : (
-          <p className="text-red-400">Failed to load chart data.</p>
-        )}
+        
+        <div id="tradingview_chart" ref={container} className="w-full h-full" />
       </div>
     </div>
   );

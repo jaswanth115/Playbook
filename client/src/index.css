@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes candle-1 {
+
+  0%,
+  100% {
+    height: 20px;
+    top: 40%;
+  }
+
+  50% {
+    height: 40px;
+    top: 30%;
+  }
+}
+
+@keyframes candle-2 {
+
+  0%,
+  100% {
+    height: 35px;
+    top: 35%;
+  }
+
+  50% {
+    height: 15px;
+    top: 45%;
+  }
+}
+
+@keyframes candle-3 {
+
+  0%,
+  100% {
+    height: 25px;
+    top: 38%;
+  }
+
+  50% {
+    height: 50px;
+    top: 25%;
+  }
+}
+
+.candle-anim-1 {
+  animation: candle-1 2s ease-in-out infinite;
+}
+
+.candle-anim-2 {
+  animation: candle-2 1.5s ease-in-out infinite;
+}
+
+.candle-anim-3 {
+  animation: candle-3 2.5s ease-in-out infinite;
+}
+
 :root {
   color-scheme: dark;
 }

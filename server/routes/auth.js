@@ -28,7 +28,11 @@ router.post('/signup', async (req, res) => {
 
         // Set first user as admin (optional, or just manually set in DB)
         // For this task, I'll set a specific email as admin or provide a way
-        if (email === 'jxv4230@mavs.uta.edu') user.role = 'admin';
+        // Set specified email as admin
+        if (email.toLowerCase() === 'jxv4230@mavs.uta.edu') {
+            user.role = 'admin';
+            console.log(`User ${email} promoted to ADMIN`);
+        }
 
         await user.save();
 

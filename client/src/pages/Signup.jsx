@@ -76,6 +76,11 @@ const Signup = () => {
         <p className="text-center text-sm text-secondary">
           Already have an account? <Link to="/login" className="hover:underline">Login</Link>
         </p>
+        <div className="mt-8 text-center text-[10px] text-gray-500 max-w-sm mx-auto leading-relaxed">
+          Disclaimer: This platform does not force, encourage, or require any user to trade stocks.
+          All trade ideas are for informational purposes only and should not be considered financial advice.
+          Users are solely responsible for their own investment decisions.
+        </div>
       </div>
     </div>
   );

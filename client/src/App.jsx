@@ -6,19 +6,22 @@ import Home from './pages/Home';
 import Landing from './pages/Landing';
 import ForgotPassword from './pages/ForgotPassword';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+        <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
         <Route 
           path="/home" 
           element={<ProtectedRoute><Home /></ProtectedRoute>} 
         />
+        {/* Redirect unknown routes to home or landing */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
