@@ -22,10 +22,9 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark px-4">
-      <div className="max-w-md w-full space-y-8 p-10 bg-card rounded-2xl border border-white/10">
+      <div className="max-w-md w-full space-y-8 p-10 rounded-2xl">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-primary">Playbook</h2>
-          <p className="mt-2 text-center text-sm text-secondary">Sign in to your account</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
@@ -33,7 +32,7 @@ const Login = () => {
             <input
               type="email"
               placeholder="Enter your Email"
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+              className="w-full px-4 py-3 bg-white/5 border-white/10 rounded-xl transition-all text-white"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -41,24 +40,24 @@ const Login = () => {
             <input
               type="password"
               placeholder="Enter Password"
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+              className="w-full px-4 py-3 bg-white/5 border-white/10 rounded-xl transition-all text-white"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
           <div className="flex items-center justify-between">
-            <Link to="/forgot-password" size="sm" className="text-xs text-accent-cyan hover:underline">Forgot password?</Link>
+            <Link to="/forgot-password" size="sm" className="text-xs hover:underline">Forgot password?</Link>
           </div>
           <button
             type="submit"
-            className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-semibold transition-all border border-white/10"
+            className="w-full py-3 px-4 text-white rounded-xl font-semibold transition-all"
           >
             Login
           </button>
         </form>
         <p className="text-center text-sm text-secondary">
-          Don't have an account? <Link to="/signup" className="text-accent-cyan hover:underline">Signup</Link>
+          Don't have an account? <Link to="/signup" className="hover:underline">Signup</Link>
         </p>
       </div>
     </div>
