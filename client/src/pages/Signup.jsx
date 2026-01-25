@@ -29,14 +29,14 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark px-4">
-      <div className="max-w-md w-full space-y-8 p-10 bg-card rounded-2xl border border-white/10">
+      <div className="max-w-md w-full space-y-8 p-10 rounded-2xl">
         <h2 className="text-center text-3xl font-extrabold text-primary">Playbook</h2>
         <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <input
             type="text"
-            placeholder="UserName"
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+            placeholder="Name"
+            className="w-full px-4 py-3 bg-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
             value={formData.username}
             onChange={(e) => setFormData({...formData, username: e.target.value})}
             required
@@ -44,7 +44,7 @@ const Signup = () => {
           <input
             type="email"
             placeholder="Enter your Email"
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+            className="w-full px-4 py-3 bg-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
             value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
             required
@@ -52,7 +52,7 @@ const Signup = () => {
           <input
             type="password"
             placeholder="Enter Password"
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+            className="w-full px-4 py-3 bg-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
             value={formData.password}
             onChange={(e) => setFormData({...formData, password: e.target.value})}
             required
@@ -60,20 +60,20 @@ const Signup = () => {
           <input
             type="password"
             placeholder="Confirm Password"
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+            className="w-full px-4 py-3 bg-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
             value={formData.confirmPassword}
             onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
             required
           />
           <button
             type="submit"
-            className="w-full py-3 px-4 mt-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-semibold transition-all border border-white/10"
+            className="w-full py-3 px-4 mt-4 text-white rounded-xl font-semibold transition-all"
           >
             Signup
           </button>
         </form>
         <p className="text-center text-sm text-secondary">
-          Already have an account? <Link to="/login" className="text-accent-cyan hover:underline">Login</Link>
+          Already have an account? <Link to="/login" className="hover:underline">Login</Link>
         </p>
       </div>
     </div>
