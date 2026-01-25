@@ -15,6 +15,11 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ message: 'Only UTA student emails are allowed' });
         }
 
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters long and include: 1 uppercase, 1 lowercase, 1 number, and 1 special character.' });
+        }
+
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ message: 'User already exists' });
 

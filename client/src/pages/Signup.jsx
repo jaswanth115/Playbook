@@ -12,8 +12,9 @@ const Signup = () => {
     if (formData.password !== formData.confirmPassword) {
       return setError('Passwords do not match');
     }
-    if (formData.password.length < 6) {
-      return setError('Password must be at least 6 characters');
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      return setError('Password must be at least 8 characters long and include: 1 uppercase, 1 lowercase, 1 number, and 1 special character.');
     }
     if (!formData.email.endsWith('@mavs.uta.edu')) {
       return setError('Only @mavs.uta.edu emails allowed');
@@ -36,7 +37,7 @@ const Signup = () => {
           <input
             type="text"
             placeholder="Name"
-            className="w-full px-4 py-3 bg-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+            className="w-full px-4 py-3 bg-white/5 rounded-xl transition-all text-white"
             value={formData.username}
             onChange={(e) => setFormData({...formData, username: e.target.value})}
             required
@@ -44,7 +45,7 @@ const Signup = () => {
           <input
             type="email"
             placeholder="Enter your Email"
-            className="w-full px-4 py-3 bg-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+            className="w-full px-4 py-3 bg-white/5 rounded-xl transition-all text-white"
             value={formData.email}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
             required
@@ -52,7 +53,7 @@ const Signup = () => {
           <input
             type="password"
             placeholder="Enter Password"
-            className="w-full px-4 py-3 bg-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+            className="w-full px-4 py-3 bg-white/5 rounded-xl transition-all text-white"
             value={formData.password}
             onChange={(e) => setFormData({...formData, password: e.target.value})}
             required
@@ -60,7 +61,7 @@ const Signup = () => {
           <input
             type="password"
             placeholder="Confirm Password"
-            className="w-full px-4 py-3 bg-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-cyan transition-all text-white"
+            className="w-full px-4 py-3 bg-white/5 rounded-xl transition-all text-white"
             value={formData.confirmPassword}
             onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
             required
