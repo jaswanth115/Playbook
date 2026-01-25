@@ -31,6 +31,27 @@ router.post('/signup', async (req, res) => {
         if (email === 'jxv4230@mavs.uta.edu') user.role = 'admin';
 
         await user.save();
+
+        // Send Welcome Email
+        const welcomeHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h1 style="color: #00f2fe;">Welcome to Playbook!</h1>
+                </div>
+                <h2 style="text-align: center; color: #333;">Hello, ${username}!</h2>
+                <p style="text-align: center; color: #555;">
+                    We're thrilled to have you onboard. Playbook is your ultimate portal for tracking and analyzing trades with the UTA community.
+                </p>
+                <p style="text-align: center; color: #555;">
+                    Feel free to explore and level up your strategy. If you have any questions, we're here to help!
+                </p>
+                <div style="text-align: center; margin-top: 20px; color: #aaa;">
+                    <p>&copy; 2026 Playbook UTA</p>
+                </div>
+            </div>
+        `;
+        await sendEmail(email, 'Welcome to Playbook!', `Welcome to Playbook, ${username}!`, welcomeHtml);
+
         res.status(201).json({ message: 'User registered successfully' });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -66,7 +87,23 @@ router.post('/forgot-password', async (req, res) => {
         user.otpExpires = Date.now() + 3600000; // 1 hour
         await user.save();
 
-        await sendEmail(email, 'Password Reset OTP', `Your OTP for password reset is: ${otp}`);
+        console.log(`DEBUG: OTP for ${email} is ${otp}`);
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #333; text-align: center;">Playbook Password Reset</h2>
+                <p>Hello,</p>
+                <p>You requested a password reset for your Playbook account. Your One-Time Password (OTP) is:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; background: #f4f4f4; padding: 10px 20px; border-radius: 5px; color: #000;">${otp}</span>
+                </div>
+                <p>This code will expire in 1 hour. If you did not request this, please ignore this email.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="font-size: 12px; color: #888; text-align: center;">Playbook UTA - Secure Trading Community</p>
+            </div>
+        `;
+
+        await sendEmail(email, 'Your Playbook OTP', `Your OTP is: ${otp}`, html);
         res.json({ message: 'OTP sent to email' });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -77,6 +114,12 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters long and include: 1 uppercase, 1 lowercase, 1 number, and 1 special character.' });
+        }
+
         const user = await User.findOne({ email, otp, otpExpires: { $gt: Date.now() } });
         if (!user) return res.status(400).json({ message: 'Invalid or expired OTP' });
 

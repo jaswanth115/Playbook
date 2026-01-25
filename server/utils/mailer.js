@@ -1,7 +1,9 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.SENDER_MAIL,
         pass: process.env.MAIL_PASS
@@ -10,16 +12,18 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async (to, subject, text, html) => {
     try {
-        await transporter.sendMail({
-            from: `"Playbook Admin" <${process.env.SENDER_MAIL}>`,
+        const fromEmail = process.env.SENDER_MAIL;
+        const info = await transporter.sendMail({
+            from: `"Playbook" <${fromEmail}>`,
             to,
             subject,
             text,
             html
         });
-        console.log(`Email sent to ${to}`);
+        console.log(`Email sent successfully: ${info.messageId} to ${to}`);
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('CRITICAL: Error sending email via NodeMailer:');
+        console.error(error);
     }
 };
 
