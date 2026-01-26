@@ -12,7 +12,7 @@ router.post('/signup', async (req, res) => {
 
         // Email validation (redundant but good practice)
         if (!email.endsWith('@mavs.uta.edu')) {
-            return res.status(400).json({ message: 'Only UTA student emails are allowed' });
+            return res.status(400).json({ message: 'Only student emails are allowed' });
         }
 
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;

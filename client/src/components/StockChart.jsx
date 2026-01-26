@@ -23,7 +23,7 @@ const StockChart = ({ symbol, onClose }) => {
       if (window.TradingView && container.current) {
         new window.TradingView.widget({
           "autosize": true,
-          "symbol": `NASDAQ:${symbol}`, // Most UTA students track tech, common to use NASDAQ
+          "symbol": `NASDAQ:${symbol}`,
           "interval": "D",
           "timezone": "Etc/UTC",
           "theme": "dark",

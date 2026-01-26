@@ -17,7 +17,7 @@ const Signup = () => {
       return setError('Password must be at least 8 characters long and include: 1 uppercase, 1 lowercase, 1 number, and 1 special character.');
     }
     if (!formData.email.endsWith('@mavs.uta.edu')) {
-      return setError('Only @mavs.uta.edu emails allowed');
+      return setError('Enter your school email');
     }
 
     try {
