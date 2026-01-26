@@ -55,7 +55,16 @@ router.get('/', authMiddleware, async (req, res) => {
                 currentPrice = livePrice;
                 console.log(`SUCCESS: Live price for ${trade.symbol}: $${currentPrice}`);
             } else {
-                console.warn(`WARNING: Failed to get live price for ${trade.symbol}, using fallback.`);
+                console.warn(`WARNING: Python fetch failed for ${trade.symbol}, falling back to Node library.`);
+                try {
+                    const quote = await yahooFinance.quote(trade.symbol);
+                    if (quote && quote.regularMarketPrice) {
+                        currentPrice = quote.regularMarketPrice;
+                        console.log(`SUCCESS: Node fallback price for ${trade.symbol}: $${currentPrice}`);
+                    }
+                } catch (nodeErr) {
+                    console.error(`CRITICAL: Node fallback also failed for ${trade.symbol}:`, nodeErr.message);
+                }
             }
 
             // Get interaction counts
