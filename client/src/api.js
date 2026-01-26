@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api', // Update to production URL for Vercel
+    baseURL: window.location.origin.includes('localhost')
+        ? 'http://localhost:5000/api'
+        : '/api',
 });
 
 // Add token to requests
