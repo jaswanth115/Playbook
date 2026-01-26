@@ -19,23 +19,11 @@
             "destination": "server/index.js"
         },
         {
-            "source": "/assets/(.*)",
-            "destination": "/assets/$1"
+            "handle": "filesystem"
         },
         {
-            "source": "/((?!api/).*)",
-            "destination": "/index.html"
-        }
-    ],
-    "headers": [
-        {
             "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "Access-Control-Allow-Origin",
-                    "value": "*"
-                }
-            ]
+            "destination": "/index.html"
         }
     ]
 }
