@@ -19,19 +19,12 @@
             "destination": "server/index.js"
         },
         {
-            "source": "/((?!api/).*)",
-            "destination": "client/index.html"
-        }
-    ],
-    "headers": [
+            "source": "/((?!static|.*\\..*).*)",
+            "destination": "/index.html"
+        },
         {
             "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "Access-Control-Allow-Origin",
-                    "value": "*"
-                }
-            ]
+            "destination": "/$1"
         }
     ]
 }
