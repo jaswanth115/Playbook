@@ -72,7 +72,7 @@ const Signup = () => {
             />
             <input
               type="email"
-              placeholder="UTA School Email (@mavs.uta.edu)"
+              placeholder="Email"
               className="w-full px-4 py-3 bg-white/5 rounded-xl transition-all text-white border border-white/10"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}

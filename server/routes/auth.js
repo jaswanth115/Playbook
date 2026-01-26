@@ -21,20 +21,29 @@ router.post('/signup', async (req, res) => {
         }
 
         let user = await User.findOne({ email });
-        if (user) return res.status(400).json({ message: 'User already exists' });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user = new User({ username, email, password: hashedPassword });
+        if (user) {
+            if (user.isVerified) {
+                return res.status(400).json({ message: 'User already exists' });
+            }
+            // If exists but not verified, allow "overwriting" by updating credentials
+            user.username = username;
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user.password = hashedPassword;
+            console.log(`Unverified user ${email} re-signing up. Data overwritten.`);
+        } else {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user = new User({ username, email, password: hashedPassword });
+        }
 
-        // Generate verification OTP
+        // Generate/Update verification OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.otp = otp;
         user.otpExpires = Date.now() + 3600000; // 1 hour
 
-        // Set specified email as admin
+        // Set specified email as admin (preserved for retries too)
         if (email.toLowerCase() === 'jxv4230@mavs.uta.edu') {
             user.role = 'admin';
-            console.log(`User ${email} promoted to ADMIN`);
         }
 
         await user.save();
