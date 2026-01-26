@@ -42,16 +42,19 @@ const StockChart = ({ symbol, onClose }) => {
   }, [symbol]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="w-full max-w-6xl h-[80vh] bg-[#0a0a0a] p-6 rounded-2xl relative border border-white/10 shadow-2xl">
-        <button 
-          onClick={onClose}
-          className="absolute -top-12 right-0 text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all flex items-center gap-2 px-4"
-        >
-          ✕ Close Graph
-        </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-2 md:p-8">
+      <div className="w-full h-full md:h-[85vh] max-w-7xl bg-[#0a0a0a] p-2 md:p-6 rounded-2xl relative border border-white/10 shadow-2xl flex flex-col">
+        <div className="flex items-center justify-between p-2 md:p-0 mb-2">
+          <h3 className="text-sm md:text-xl font-bold text-primary">{symbol} Live Chart</h3>
+          <button 
+            onClick={onClose}
+            className="text-white bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all text-xs font-bold px-3"
+          >
+            ✕ Close
+          </button>
+        </div>
         
-        <div id="tradingview_chart" ref={container} className="w-full h-full" />
+        <div id="tradingview_chart" ref={container} className="flex-1 w-full" />
       </div>
     </div>
   );

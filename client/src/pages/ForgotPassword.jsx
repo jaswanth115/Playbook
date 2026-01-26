@@ -41,8 +41,8 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark px-4">
-      <div className="max-w-md w-full space-y-8 p-10 rounded-2xl text-center">
+    <div className="min-h-screen flex items-center justify-center bg-dark px-4 py-8">
+      <div className="max-w-md w-full space-y-8 p-6 md:p-10 rounded-2xl text-center border border-white/5 bg-white/[0.02]">
         <h2 className="text-3xl font-extrabold text-primary">Reset Password</h2>
         {message && <p className="text-green-400 text-sm">{message}</p>}
         {error && <p className="text-red-400 text-sm">{error}</p>}

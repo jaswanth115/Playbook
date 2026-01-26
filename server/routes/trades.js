@@ -196,7 +196,21 @@ router.get('/:id/interactions', async (req, res) => {
     }
 });
 
-// Post comment
+// Post global comment (not tied to a specific trade)
+router.post('/comment', authMiddleware, async (req, res) => {
+    try {
+        const comment = new Comment({
+            userId: req.user.id,
+            comment: req.body.comment
+        });
+        await comment.save();
+        res.json(comment);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Post comment tied to a specific trade
 router.post('/:id/comment', authMiddleware, async (req, res) => {
     try {
         const comment = new Comment({

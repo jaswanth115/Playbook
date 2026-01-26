@@ -6,11 +6,11 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-dark text-white flex flex-col items-center justify-center p-8 space-y-12">
-      <div className="text-center space-y-4">
-        <h1 className="text-6xl font-black tracking-tighter bg-gradient-to-r from-accent-cyan to-accent-purple bg-clip-text text-transparent">
+      <div className="text-center space-y-4 px-4 w-full">
+        <h1 className="text-4xl md:text-6xl font-black tracking-tighter bg-gradient-to-r from-accent-cyan to-accent-purple bg-clip-text text-transparent">
           Playbook
         </h1>
-        <p className="text-secondary max-w-md mx-auto text-lg">
+        <p className="text-secondary max-w-sm mx-auto text-base md:text-lg">
           Discover trending trades.
         </p>
       </div>

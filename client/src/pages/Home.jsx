@@ -3,7 +3,7 @@ import api from '../api';
 import StockChart from '../components/StockChart';
 import TradeForm from '../components/TradeForm';
 import CandleLoader from '../components/CandleLoader';
-import { Heart, TrendingUp, MessageSquare, Plus, LogOut } from 'lucide-react';
+import { Heart, TrendingUp, MessageSquare, Plus, LogOut, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
@@ -16,6 +16,7 @@ const Home = () => {
   const [comments, setComments] = useState([]);
   const [userCount, setUserCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const commentsEndRef = React.useRef(null);
   
   const user = JSON.parse(localStorage.getItem('user'));
@@ -53,6 +54,17 @@ const Home = () => {
     scrollToBottom();
   }, [comments]);
 
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMenuOpen]);
+
   const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
@@ -71,11 +83,8 @@ const Home = () => {
   const handlePostComment = async () => {
     if (!commentText.trim()) return;
     try {
-      const tradeId = trades[0]?._id; 
-      if (tradeId) {
-        await api.post(`/trades/${tradeId}/comment`, { comment: commentText });
-        fetchData(); // Refresh all comments from DB
-      }
+      await api.post('/trades/comment', { comment: commentText });
+      fetchData(); // Refresh all comments from DB
       setCommentText('');
     } catch (err) {
       console.error('Failed to post comment', err);
@@ -96,9 +105,11 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-dark text-white flex flex-col">
-      <nav className="flex items-center justify-between px-8 py-4 border-b border-white/10 sticky top-0 bg-dark/80 backdrop-blur-md z-40">
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 sticky top-0 bg-dark/80 backdrop-blur-md z-50">
         <h1 className="text-2xl font-bold tracking-tighter cursor-pointer" onClick={() => navigate('/')}>Playbook</h1>
-        <div className="flex gap-8 text-sm font-medium text-secondary">
+        
+        {/* Desktop Menu */}
+        <div className="hidden md:flex gap-8 text-sm font-medium text-secondary">
           <button onClick={() => setActiveTab('Open')} className={activeTab === 'Open' ? 'text-white border-b-2 border-white pb-1' : ''}>Open</button>
           <button onClick={() => setActiveTab('Most Liked')} className={activeTab === 'Most Liked' ? 'text-white border-b-2 border-white pb-1' : ''}>Most Liked</button>
           <button onClick={() => setActiveTab('Most Invested')} className={activeTab === 'Most Invested' ? 'text-white border-b-2 border-white pb-1' : ''}>Most Invested</button>
@@ -112,13 +123,57 @@ const Home = () => {
             </button>
           )}
         </div>
+
         <div className="flex items-center gap-4">
-          <span className="text-sm">{user?.username}</span>
-          <button onClick={handleLogout} className="p-2 hover:bg-white/5 rounded-full"><LogOut size={18} /></button>
+          <div className="hidden md:flex items-center gap-4">
+            <span className="text-sm truncate max-w-[150px]">{user?.username}</span>
+            <button onClick={handleLogout} className="p-2 hover:bg-white/5 rounded-full"><LogOut size={18} /></button>
+          </div>
+          
+          {/* Hamburger Toggle */}
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-secondary hover:text-white"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </nav>
 
-      <main className="flex-1 max-w-6xl w-full mx-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Mobile Menu Drawer */}
+      <div className={`fixed inset-0 z-40 md:hidden transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
+        <div className="absolute right-0 top-0 bottom-0 w-64 bg-card border-l border-white/10 p-8 flex flex-col gap-6 shadow-2xl overflow-y-auto">
+          <p className="text-xs text-secondary uppercase tracking-widest mb-2 font-bold opacity-50">Navigation</p>
+          <button onClick={() => {setActiveTab('Open'); setIsMenuOpen(false)}} className={`text-left text-lg ${activeTab === 'Open' ? 'text-accent-cyan font-bold' : 'text-secondary'}`}>Open Trades</button>
+          <button onClick={() => {setActiveTab('Most Liked'); setIsMenuOpen(false)}} className={`text-left text-lg ${activeTab === 'Most Liked' ? 'text-accent-cyan font-bold' : 'text-secondary'}`}>Most Liked</button>
+          <button onClick={() => {setActiveTab('Most Invested'); setIsMenuOpen(false)}} className={`text-left text-lg ${activeTab === 'Most Invested' ? 'text-accent-cyan font-bold' : 'text-secondary'}`}>Most Invested</button>
+          <button onClick={() => {setActiveTab('Closed'); setIsMenuOpen(false)}} className={`text-left text-lg ${activeTab === 'Closed' ? 'text-accent-cyan font-bold' : 'text-secondary'}`}>Closed Trades</button>
+          
+          <div className="h-px bg-white/10 my-2" />
+          
+          {isAdmin && (
+            <button 
+              onClick={() => {setEditingTrade(null); setShowForm(true); setIsMenuOpen(false)}}
+              className="flex items-center gap-2 text-accent-cyan text-lg font-bold"
+            >
+              <Plus size={20} /> Post New Trade
+            </button>
+          )}
+          
+          <div className="mt-auto pt-6 border-t border-white/10 space-y-4">
+            <div className="flex flex-col">
+              <span className="text-xs text-secondary mb-1 opacity-50">Active User</span>
+              <span className="text-sm font-bold truncate">{user?.username}</span>
+            </div>
+            <button onClick={handleLogout} className="flex items-center gap-2 text-red-400 font-medium">
+              <LogOut size={18} /> Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <div className="text-center mb-8">
             <p className="text-secondary text-sm">Followers {userCount > 1000 ? `${(userCount / 1000).toFixed(1)}K` : userCount}</p>
@@ -128,6 +183,14 @@ const Home = () => {
             <div className="py-20">
               <CandleLoader />
               <p className="text-center text-xs text-secondary mt-4 animate-pulse">Syncing with markets...</p>
+            </div>
+          ) : sortedTrades.length === 0 ? (
+            <div className="py-20 text-center space-y-4">
+              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp size={32} className="text-secondary opacity-30" />
+              </div>
+              <p className="text-secondary font-medium italic">No trades available yet..</p>
+              <p className="text-[10px] text-secondary/50">Check back later for market updates</p>
             </div>
           ) : (
             sortedTrades.map((trade) => {
@@ -139,11 +202,11 @@ const Home = () => {
                 <div 
                   key={trade._id}
                   onClick={() => setSelectedSymbol(trade.symbol)}
-                  className="group relative flex items-center justify-between p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all cursor-pointer overflow-hidden"
+                  className="group relative flex flex-col md:flex-row items-center justify-between p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all cursor-pointer overflow-hidden gap-6 md:gap-0"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   
-                  <div className="flex items-center gap-6 z-10 w-1/3">
+                  <div className="flex items-center gap-6 z-10 w-full md:w-1/3">
                     <div className="flex flex-col">
                       <span className="text-[10px] text-secondary font-mono mb-1">
                         {trade.status === 'Open' ? 'Bought on' : 'Sold on'} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleDateString()} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -159,7 +222,7 @@ const Home = () => {
                     </div>
                   )}
 
-                  <div className="flex flex-1 justify-around items-center z-10">
+                  <div className="flex flex-1 w-full justify-around items-center z-10 border-y md:border-y-0 border-white/5 py-4 md:py-0">
                     <div className="text-center">
                       <p className="text-[10px] text-secondary uppercase tracking-widest">{trade.status === 'Open' ? 'Bought at' : 'Sold at'}</p>
                       <p className="text-lg font-semibold">${trade.status === 'Open' ? trade.entry : trade.exit}</p>
@@ -175,7 +238,7 @@ const Home = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-6 z-10 ml-4">
+                  <div className="flex items-center justify-center md:justify-end gap-6 z-10 w-full md:w-auto">
                     <div 
                       onClick={(e) => handleInteraction(e, trade._id, 'invest')}
                       className="flex items-center gap-2 group/btn cursor-pointer"
@@ -207,7 +270,7 @@ const Home = () => {
                           setEditingTrade(trade);
                           setShowForm(true);
                         }}
-                        className="ml-4 px-4 py-2 bg-white/10 hover:bg-green-500/20 text-white rounded-lg text-xs"
+                        className="px-4 py-2 bg-white/10 hover:bg-green-500/20 text-white rounded-lg text-xs"
                       >
                         Close
                       </button>

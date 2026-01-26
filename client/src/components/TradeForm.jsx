@@ -50,7 +50,7 @@ const TradeForm = ({ trade, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md p-8 rounded-2xl border border-white/10 bg-card">
+      <div className="w-full max-w-md p-6 md:p-8 rounded-2xl border border-white/10 bg-card">
         <h3 className="text-2xl font-bold mb-6 text-primary">{isEditing ? 'Close Trade' : 'Post New Trade'}</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isEditing ? (

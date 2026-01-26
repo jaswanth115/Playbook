@@ -29,8 +29,8 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark px-4">
-      <div className="max-w-md w-full space-y-8 p-10 rounded-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-dark px-4 py-8">
+      <div className="max-w-md w-full space-y-8 p-6 md:p-10 rounded-2xl border border-white/5 bg-white/[0.02]">
         <h2 className="text-center text-3xl font-extrabold text-primary">Playbook</h2>
         <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
