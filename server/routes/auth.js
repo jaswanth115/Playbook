@@ -47,7 +47,7 @@ router.post('/signup', async (req, res) => {
                     Browse shared trade ideas, see what others are engaging with, and make decisions that align with your own strategy.
                 </p>
                 <p style="text-align: center; color: #555;">
-                    Take your time exploring the platform. If you have any questions, feel free to reach out.
+                    Take your time exploring the platform.
                 </p>
                 <div style="text-align: center; margin-top: 20px; color: #aaa;">
                     <p>&copy; 2026 Playbook</p>
@@ -102,7 +102,6 @@ router.post('/forgot-password', async (req, res) => {
                     <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; background: #f4f4f4; padding: 10px 20px; border-radius: 5px; color: #000;">${otp}</span>
                 </div>
                 <p>This code will expire in 1 hour. If you did not request this, please ignore this email.</p>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
                 <p style="font-size: 12px; color: #888; text-align: center;">&copy; 2026 Playbook</p>
             </div>
         `;
