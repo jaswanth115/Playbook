@@ -1,4 +1,6 @@
 require('dotenv').config();
+
+const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -21,6 +23,12 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/trades', tradeRoutes);
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
