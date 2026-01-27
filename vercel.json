@@ -13,25 +13,17 @@
             }
         }
     ],
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/(.*)",
-            "destination": "server/index.js"
+            "src": "/api/(.*)",
+            "dest": "server/index.js"
         },
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ],
-    "headers": [
+            "handle": "filesystem"
+        },
         {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "Access-Control-Allow-Origin",
-                    "value": "*"
-                }
-            ]
+            "src": "/(.*)",
+            "dest": "/index.html"
         }
     ]
 }
