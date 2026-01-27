@@ -292,9 +292,18 @@ const Home = () => {
                 </div>
               ) : (
                 comments.map((c, i) => (
-                  <div key={i} className="p-3 rounded-xl text-xs border border-white/5 text-secondary">
+                  <div key={i} className="p-3 rounded-xl text-xs border-white/5 text-secondary">
                     <div className="flex justify-between items-start mb-1">
-                      <p className="text-accent-cyan font-bold">{c.userId?.username || 'User'}</p>
+                      {isAdmin ? (
+                        <p className="text-accent-cyan font-bold">
+                          {c.userId?.username || 'User'}{' '}
+                          <span className="text-[10px] text-secondary font-normal opacity-70">
+                            ({c.userId?.email})
+                          </span>
+                        </p>
+                      ) : (
+                         <div /> // Empty div for flex alignment when not admin
+                      )}
                       <p className="text-[9px] text-secondary whitespace-nowrap ml-2">
                          {new Date(c.createdAt).toLocaleDateString()} {new Date(c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
