@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
 import StockChart from '../components/StockChart';
+import { Check } from 'lucide-react';
 import TradeForm from '../components/TradeForm';
 import CandleLoader from '../components/CandleLoader';
 import { Heart, TrendingUp, MessageSquare, Plus, LogOut, Menu, X } from 'lucide-react';
@@ -225,9 +226,9 @@ const Home = () => {
                   <div className="flex flex-1 w-full justify-around items-center z-10 border-y md:border-y-0 border-white/5 py-4 md:py-0">
                     <div className="text-center">
                       <p className="text-[10px] text-secondary uppercase tracking-widest">{trade.status === 'Open' ? 'Bought at' : 'Sold at'}</p>
-                      <p className="text-lg font-semibold">${trade.status === 'Open' ? trade.entry : trade.exit}</p>
+                      <p className="text-lg font-semibold">{trade.status === 'Open' ? trade.entry : trade.exit}</p>
                       {trade.status === 'Open' && (
-                         <p className="text-[10px] text-accent-cyan">Live: ${trade.currentPrice?.toFixed(2)}</p>
+                         <p className="text-[10px] text-green-400">Live: {trade.currentPrice?.toFixed(2)}</p>
                       )}
                     </div>
                     <div className="text-center">
@@ -240,11 +241,21 @@ const Home = () => {
 
                   <div className="flex items-center justify-center md:justify-end gap-6 z-10 w-full md:w-auto">
                     <div 
-                      onClick={(e) => handleInteraction(e, trade._id, 'invest')}
                       className="flex items-center gap-2 group/btn cursor-pointer"
                     >
-                      <div className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${trade.userInvested ? 'bg-gradient-to-br from-accent-cyan to-accent-purple border-transparent' : 'border-white/10 group-hover/btn:border-accent-cyan/50'}`}>
-                         <TrendingUp size={14} className={trade.userInvested ? 'text-white' : 'text-secondary'} />
+                      <div
+                        className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${
+                          trade.userInvested
+                            ? 'bg-gradient-to-br from-rose-500 to-pink-500 border-transparent shadow-md'
+                            : 'border-white/10 group-hover/btn:border-rose-400/50'
+                        }`}
+                        onClick={(e) => handleInteraction(e, trade._id, 'invest')}
+                      >
+                        <Check
+                          size={14}
+                          strokeWidth={3}
+                          className={trade.userInvested ? 'text-white' : 'text-secondary'}
+                        />
                       </div>
                       <div>
                         <p className="text-[10px] text-secondary">Invested</p>
@@ -252,11 +263,24 @@ const Home = () => {
                       </div>
                     </div>
                     <div 
-                      onClick={(e) => handleInteraction(e, trade._id, 'like')}
                       className="flex items-center gap-2 group/btn cursor-pointer"
                     >
-                      <div className={`p-2 rounded-full transition-all ${trade.userLiked ? 'bg-accent-purple/20' : 'bg-white/5 group-hover/btn:bg-white/10'}`}>
-                        <Heart size={18} className={trade.userLiked ? 'text-accent-purple fill-accent-purple' : 'text-secondary'} />
+                      <div
+                        className={`w-8 h-8 rounded-full transition-all flex items-center justify-center ${
+                          trade.userLiked
+                            ? 'bg-rose-500 border-2 border-transparent shadow-md'
+                            : 'border-2 border-white/10 bg-transparent group-hover/btn:border-rose-400/50'
+                        }`}
+                        onClick={(e) => handleInteraction(e, trade._id, 'like')}
+                      >
+                        <Heart
+                          size={14}
+                          className={
+                            trade.userLiked
+                              ? 'text-white fill-white transition-transform duration-150 scale-105'
+                              : 'text-secondary transition-transform duration-150'
+                          }
+                        />
                       </div>
                       <div>
                         <p className="text-[10px] text-secondary">Liked</p>
