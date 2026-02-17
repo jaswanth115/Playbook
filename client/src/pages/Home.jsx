@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
 import StockChart from '../components/StockChart';
+import NumberFlow from '@number-flow/react';
 import { Check } from 'lucide-react';
 import TradeForm from '../components/TradeForm';
 import CandleLoader from '../components/CandleLoader';
@@ -196,8 +197,8 @@ const Home = () => {
           ) : (
             sortedTrades.map((trade) => {
               const pnl = trade.status === 'Open' 
-                ? ((trade.currentPrice - trade.entry) / trade.entry * 100).toFixed(2)
-                : ((trade.exit - trade.entry) / trade.entry * 100).toFixed(2);
+                ? ((trade.currentPrice - trade.entry) / trade.entry * 100)
+                : ((trade.exit - trade.entry) / trade.entry * 100);
               
               return (
                 <div 
@@ -228,13 +229,19 @@ const Home = () => {
                       <p className="text-[10px] text-secondary uppercase tracking-widest">{trade.status === 'Open' ? 'Bought at' : 'Sold at'}</p>
                       <p className="text-lg font-semibold">{trade.status === 'Open' ? trade.entry : trade.exit}</p>
                       {trade.status === 'Open' && (
-                         <p className="text-[10px] text-green-400">Live: {trade.currentPrice?.toFixed(2)}</p>
+                         <p className="text-[10px] text-green-400 flex items-center justify-center gap-1">
+                          Live: <NumberFlow value={trade.currentPrice} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
+                         </p>
                       )}
                     </div>
                     <div className="text-center">
                       <p className="text-[10px] text-secondary uppercase tracking-widest">P&L</p>
-                      <p className={`font-bold ${parseFloat(pnl) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {parseFloat(pnl) >= 0 ? '+' : ''}{pnl}%
+                      <p className={`font-bold flex items-center justify-center ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <NumberFlow 
+                          value={pnl} 
+                          format={{ minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'always' }}
+                          suffix="%"
+                        />
                       </p>
                     </div>
                   </div>
