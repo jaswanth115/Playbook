@@ -44,7 +44,7 @@ const getLivePrice = (symbol, exchange = 'NASDAQ') => {
 router.get('/', authMiddleware, async (req, res) => {
     try {
         const trades = await Trade.find().sort({ createdAt: -1 }).lean();
-        const userCount = await User.countDocuments();
+
 
         const enhancedTrades = await Promise.all(trades.map(async (trade) => {
             // Get live price via Python helper
@@ -88,7 +88,7 @@ router.get('/', authMiddleware, async (req, res) => {
             };
         }));
 
-        res.json({ trades: enhancedTrades, userCount });
+        res.json({ trades: enhancedTrades });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -197,16 +197,6 @@ router.post('/interact', authMiddleware, async (req, res) => {
     }
 });
 
-// Get interaction counts
-router.get('/:id/interactions', async (req, res) => {
-    try {
-        const likes = await Like.countDocuments({ tradeId: req.params.id });
-        const invests = await Invest.countDocuments({ tradeId: req.params.id });
-        res.json({ likes, invests });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
 
 // Post global comment (not tied to a specific trade)
 router.post('/comment', authMiddleware, async (req, res) => {
@@ -222,20 +212,7 @@ router.post('/comment', authMiddleware, async (req, res) => {
     }
 });
 
-// Post comment tied to a specific trade
-router.post('/:id/comment', authMiddleware, async (req, res) => {
-    try {
-        const comment = new Comment({
-            userId: req.user.id,
-            tradeId: req.params.id,
-            comment: req.body.comment
-        });
-        await comment.save();
-        res.json(comment);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+
 
 // Get stock history for chart
 router.get('/history/:symbol', authMiddleware, async (req, res) => {

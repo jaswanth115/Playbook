@@ -16,7 +16,7 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState('Open');
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState([]);
-  const [userCount, setUserCount] = useState(0);
+
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const commentsContainerRef = useRef(null);
@@ -40,7 +40,7 @@ const Home = () => {
         api.get('/trades/comments/all')
       ]);
       setTrades(tradesRes.data.trades);
-      setUserCount(tradesRes.data.userCount);
+
       setComments(commentsRes.data);
     } catch (err) {
       console.log('Failed to fetch data', err);
@@ -181,9 +181,7 @@ const Home = () => {
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="text-center mb-8">
-            <p className="text-secondary text-sm">Followers {userCount > 1000 ? `${(userCount / 1000).toFixed(1)}K` : userCount}</p>
-          </div>
+
 
           {loading ? (
             <div className="py-20">
@@ -270,7 +268,9 @@ const Home = () => {
                       </div>
                       <div>
                         <p className="text-[10px] text-secondary">Invested</p>
-                        <p className="text-sm font-bold">{trade.investsCount || 0}</p>
+                        <p className="text-sm font-bold">
+                          <NumberFlow value={trade.investsCount || 0} />
+                        </p>
                       </div>
                     </div>
                     <div 
@@ -295,7 +295,9 @@ const Home = () => {
                       </div>
                       <div>
                         <p className="text-[10px] text-secondary">Liked</p>
-                        <p className="text-sm font-bold">{trade.likesCount || 0}</p>
+                        <p className="text-sm font-bold">
+                          <NumberFlow value={trade.likesCount || 0} />
+                        </p>
                       </div>
                     </div>
                     {isAdmin && trade.status === 'Open' && (
