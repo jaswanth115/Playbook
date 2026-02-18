@@ -7,6 +7,7 @@ const tradeSchema = new mongoose.Schema({
     status: { type: String, enum: ['Open', 'Closed'], default: 'Open' },
     entry: { type: Number, required: true },
     exit: { type: Number },
+    currentPrice: { type: Number }, // Cached live price
     postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 

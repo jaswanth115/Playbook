@@ -51,8 +51,8 @@ const Home = () => {
 
   useEffect(() => {
     fetchData();
-    // Refresh every 30 seconds for live data
-    const interval = setInterval(fetchData, 30000);
+    // Refresh every 2 seconds for live data
+    const interval = setInterval(fetchData, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -78,22 +78,57 @@ const Home = () => {
 
   const handleInteraction = async (e, tradeId, type) => {
     e.stopPropagation();
+    
+    // Optimistic Update
+    setTrades(prevTrades => prevTrades.map(t => {
+      if (t._id === tradeId) {
+        const isLike = type === 'like';
+        const userActionKey = isLike ? 'userLiked' : 'userInvested';
+        const countKey = isLike ? 'likesCount' : 'investsCount';
+        const currentlyActive = t[userActionKey];
+        
+        return {
+          ...t,
+          [userActionKey]: !currentlyActive,
+          [countKey]: currentlyActive ? (t[countKey] || 1) - 1 : (t[countKey] || 0) + 1
+        };
+      }
+      return t;
+    }));
+
     try {
       await api.post('/trades/interact', { tradeId, type });
-      fetchData();
+      // We don't call fetchData() here anymore to keep it snappy
+      // The 2s interval will sync it eventually with ground truth
     } catch (err) {
       console.error('Interaction failed', err);
+      // Revert on error if needed, but for simplicity we let the next fetch fix it
+      fetchData();
     }
   };
 
   const handlePostComment = async () => {
     if (!commentText.trim()) return;
+    
+    const newComment = {
+      comment: commentText,
+      createdAt: new Date().toISOString(),
+      userId: {
+        username: user?.username || 'You',
+        email: user?.email || ''
+      }
+    };
+    
+    // Optimistic Update
+    setComments(prev => [...prev, newComment]);
+    setCommentText('');
+
     try {
       await api.post('/trades/comment', { comment: commentText });
-      fetchData(); // Refresh all comments from DB
-      setCommentText('');
+      // The 2s interval will sync the official ID and data
     } catch (err) {
       console.error('Failed to post comment', err);
+      fetchData(); // Sync if failed
     }
   };
 

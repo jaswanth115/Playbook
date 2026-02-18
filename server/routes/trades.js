@@ -40,43 +40,48 @@ const getLivePrice = (symbol, exchange = 'NASDAQ') => {
     });
 };
 
-// Get all trades with live data and user interactions
-router.get('/', authMiddleware, async (req, res) => {
+// Background Price Update Loop
+const updateAllPrices = async () => {
     try {
-        const trades = await Trade.find().sort({ createdAt: -1 }).lean();
+        console.log('[BG] Starting background price update...');
+        const openTrades = await Trade.find({ status: 'Open' });
 
-
-        const enhancedTrades = await Promise.all(trades.map(async (trade) => {
-            // Get live price via Python helper
-            let currentPrice = trade.exit || trade.entry;
-            console.log(`FETCHING quote for ${trade.symbol} via Python...`);
-
-            console.log(`FETCHING quote for ${trade.symbol} (${trade.exchange}) via Python...`);
-
+        for (const trade of openTrades) {
             const livePrice = await getLivePrice(trade.symbol, trade.exchange);
             if (livePrice) {
-                currentPrice = livePrice;
-                console.log(`SUCCESS: Live price for ${trade.symbol}: $${currentPrice}`);
-            } else {
-                console.warn(`WARNING: Python fetch failed for ${trade.symbol}, falling back to Node library.`);
-                try {
-                    const quote = await yahooFinance.quote(trade.symbol);
-                    if (quote && quote.regularMarketPrice) {
-                        currentPrice = quote.regularMarketPrice;
-                        console.log(`SUCCESS: Node fallback price for ${trade.symbol}: $${currentPrice}`);
-                    }
-                } catch (nodeErr) {
-                    console.error(`CRITICAL: Node fallback also failed for ${trade.symbol}:`, nodeErr.message);
-                }
+                await Trade.findByIdAndUpdate(trade._id, { currentPrice: livePrice });
+                console.log(`[BG] Updated ${trade.symbol}: $${livePrice}`);
             }
+        }
+        console.log('[BG] Background price update completed.');
+    } catch (err) {
+        console.error('[BG] Error in background price update:', err.message);
+    }
+};
+
+// Run background update every 30 seconds
+setInterval(updateAllPrices, 30000);
+// Initial run
+setTimeout(updateAllPrices, 5000);
+
+// Get all trades with cached data and user interactions
+router.get('/', authMiddleware, async (req, res) => {
+    try {
+        // 1. Fetch all trades from DB
+        const trades = await Trade.find().sort({ createdAt: -1 }).lean();
+
+        // 2. Enhance trades with interaction data (optimized)
+        const enhancedTrades = await Promise.all(trades.map(async (trade) => {
+            // Use cached price if available, fallback to entry/exit
+            const currentPrice = trade.currentPrice || (trade.status === 'Open' ? trade.entry : trade.exit);
 
             // Get interaction counts
-            const likesCount = await Like.countDocuments({ tradeId: trade._id });
-            const investsCount = await Invest.countDocuments({ tradeId: trade._id });
-
-            // Check if user liked/invested
-            const userLiked = await Like.exists({ tradeId: trade._id, userId: req.user.id });
-            const userInvested = await Invest.exists({ tradeId: trade._id, userId: req.user.id });
+            const [likesCount, investsCount, userLiked, userInvested] = await Promise.all([
+                Like.countDocuments({ tradeId: trade._id }),
+                Invest.countDocuments({ tradeId: trade._id }),
+                Like.exists({ tradeId: trade._id, userId: req.user.id }),
+                Invest.exists({ tradeId: trade._id, userId: req.user.id })
+            ]);
 
             return {
                 ...trade,
