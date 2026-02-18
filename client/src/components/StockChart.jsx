@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-const StockChart = ({ symbol, onClose }) => {
+const StockChart = ({ symbol, exchange = 'NASDAQ', onClose }) => {
   const container = useRef();
 
   useEffect(() => {
@@ -21,9 +21,10 @@ const StockChart = ({ symbol, onClose }) => {
 
     function createWidget() {
       if (window.TradingView && container.current) {
+        const prefix = exchange === 'NSE' ? 'NSE' : 'NASDAQ';
         new window.TradingView.widget({
           "autosize": true,
-          "symbol": `NASDAQ:${symbol}`,
+          "symbol": `${prefix}:${symbol}`,
           "interval": "D",
           "timezone": "Etc/UTC",
           "theme": "dark",

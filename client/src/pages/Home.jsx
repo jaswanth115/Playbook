@@ -203,7 +203,7 @@ const Home = () => {
               return (
                 <div 
                   key={trade._id}
-                  onClick={() => setSelectedSymbol(trade.symbol)}
+                  onClick={() => setSelectedSymbol({ symbol: trade.symbol, exchange: trade.exchange })}
                   className="group relative flex flex-col md:flex-row items-center justify-between p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all cursor-pointer overflow-hidden gap-6 md:gap-0"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -367,7 +367,8 @@ const Home = () => {
 
       {selectedSymbol && (
         <StockChart 
-          symbol={selectedSymbol} 
+          symbol={selectedSymbol.symbol} 
+          exchange={selectedSymbol.exchange}
           onClose={() => setSelectedSymbol(null)} 
         />
       )}

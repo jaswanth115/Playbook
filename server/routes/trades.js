@@ -20,12 +20,13 @@ const { exec } = require('child_process');
 const path = require('path');
 
 // Helper to fetch price via Python
-const getLivePrice = (symbol) => {
+const getLivePrice = (symbol, exchange = 'NASDAQ') => {
     return new Promise((resolve) => {
         const scriptPath = path.join(__dirname, '..', 'utils', 'fetch_price.py');
-        exec(`python "${scriptPath}" ${symbol}`, (error, stdout, stderr) => {
+        // Pass exchange as second argument
+        exec(`python "${scriptPath}" "${symbol}" "${exchange}"`, (error, stdout, stderr) => {
             if (error || stderr) {
-                console.error(`Python Error for ${symbol}:`, error || stderr);
+                console.error(`Python Error for ${symbol} (${exchange}):`, error || stderr);
                 return resolve(null);
             }
             try {
@@ -50,7 +51,9 @@ router.get('/', authMiddleware, async (req, res) => {
             let currentPrice = trade.exit || trade.entry;
             console.log(`FETCHING quote for ${trade.symbol} via Python...`);
 
-            const livePrice = await getLivePrice(trade.symbol);
+            console.log(`FETCHING quote for ${trade.symbol} (${trade.exchange}) via Python...`);
+
+            const livePrice = await getLivePrice(trade.symbol, trade.exchange);
             if (livePrice) {
                 currentPrice = livePrice;
                 console.log(`SUCCESS: Live price for ${trade.symbol}: $${currentPrice}`);
@@ -95,8 +98,8 @@ router.get('/', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         console.log('POST /trades - Request Body:', req.body);
-        const { symbol, name, status, entry, exit } = req.body;
-        const trade = new Trade({ symbol, name, status, entry, exit, postedBy: req.user.id });
+        const { symbol, name, exchange, status, entry, exit } = req.body;
+        const trade = new Trade({ symbol, name, exchange, status, entry, exit, postedBy: req.user.id });
         await trade.save();
 
         const postedTime = new Date(trade.createdAt).toLocaleString();

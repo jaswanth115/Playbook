@@ -6,6 +6,7 @@ const TradeForm = ({ trade, onClose, onSuccess }) => {
   const [formData, setFormData] = useState(trade || {
     symbol: '',
     name: '',
+    exchange: 'NASDAQ',
     status: 'Open',
     entry: '',
     exit: ''
@@ -55,6 +56,18 @@ const TradeForm = ({ trade, onClose, onSuccess }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isEditing ? (
             <>
+              <div className="space-y-2">
+                <label className="text-xs text-secondary pl-1">Exchange</label>
+                <select
+                  className="w-full px-4 py-3 bg-dark border border-white/10 rounded-xl text-white appearance-none cursor-pointer"
+                  value={formData.exchange}
+                  onChange={e => setFormData({...formData, exchange: e.target.value})}
+                >
+                  <option value="NASDAQ">NASDAQ (US)</option>
+                  <option value="NSE">NSE (India)</option>
+                </select>
+              </div>
+
               <input
                 type="text"
                 placeholder="Stock Symbol (e.g. NVDA)"
