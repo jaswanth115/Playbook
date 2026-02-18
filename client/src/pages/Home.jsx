@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import api from '../api';
 import StockChart from '../components/StockChart';
 import NumberFlow from '@number-flow/react';
@@ -19,14 +19,18 @@ const Home = () => {
   const [userCount, setUserCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const commentsEndRef = React.useRef(null);
+  const commentsContainerRef = useRef(null);
+  const hasScrolledRef = useRef(false);
   
   const user = JSON.parse(localStorage.getItem('user'));
   const isAdmin = user?.role === 'admin';
   const navigate = useNavigate();
 
   const scrollToBottom = () => {
-    commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (commentsContainerRef.current && !hasScrolledRef.current && comments.length > 0) {
+      commentsContainerRef.current.scrollTop = commentsContainerRef.current.scrollHeight;
+      hasScrolledRef.current = true;
+    }
   };
 
   const fetchData = async () => {
@@ -316,7 +320,7 @@ const Home = () => {
         <div className="space-y-6">
           <div className="p-6 rounded-2xl border border-white/10 sticky top-24">
             <h4 className="text-sm font-bold mb-4">Post your Thought</h4>
-            <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            <div ref={commentsContainerRef} className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               {loading ? (
                 <div className="py-10">
                   <CandleLoader />
@@ -343,7 +347,6 @@ const Home = () => {
                   </div>
                 ))
               )}
-              <div ref={commentsEndRef} />
             </div>
             <div className="relative">
               <input 
