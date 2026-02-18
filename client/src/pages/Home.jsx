@@ -20,16 +20,19 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const commentsContainerRef = useRef(null);
-  const hasScrolledRef = useRef(false);
   
   const user = JSON.parse(localStorage.getItem('user'));
   const isAdmin = user?.role === 'admin';
   const navigate = useNavigate();
 
+  const prevCommentsLengthRef = useRef(0);
+
   const scrollToBottom = () => {
-    if (commentsContainerRef.current && !hasScrolledRef.current && comments.length > 0) {
-      commentsContainerRef.current.scrollTop = commentsContainerRef.current.scrollHeight;
-      hasScrolledRef.current = true;
+    if (commentsContainerRef.current) {
+      commentsContainerRef.current.scrollTo({
+        top: commentsContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -57,7 +60,10 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    if (comments.length > prevCommentsLengthRef.current) {
+      scrollToBottom();
+    }
+    prevCommentsLengthRef.current = comments.length;
   }, [comments]);
 
   useEffect(() => {
