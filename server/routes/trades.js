@@ -19,41 +19,97 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const { exec } = require('child_process');
 const path = require('path');
 
-// Helper to fetch price via Node-native yahoo-finance2
-const getLivePrice = async (symbol, exchange = 'NASDAQ') => {
+// 1. Node-Native method (Primary for Vercel/Production)
+const getLivePriceNode = async (symbol, exchange = 'NASDAQ') => {
     try {
-        // yahoo-finance2 automatically handles most exchanges via symbol suffix
-        const result = await yahooFinance.quote(symbol);
+        let ticker = symbol;
+        if (exchange === 'NSE' && !symbol.endsWith('.NS')) {
+            ticker = `${symbol}.NS`;
+        }
+        const result = await yahooFinance.quote(ticker);
         return result.regularMarketPrice || null;
     } catch (err) {
-        console.error(`Quote Error for ${symbol}:`, err.message);
+        console.error(`[Node API] Quote Error for ${symbol}:`, err.message);
         return null;
+    }
+};
+
+// 2. Python method (Primary for Local Dev - more stable against Yahoo blocks)
+const getLivePricePython = (symbol, exchange = 'NASDAQ') => {
+    return new Promise((resolve) => {
+        const scriptPath = path.join(__dirname, '..', 'utils', 'fetch_price.py');
+        exec(`python "${scriptPath}" "${symbol}" "${exchange}"`, (error, stdout, stderr) => {
+            if (error || stderr) {
+                console.error(`[Python Script] Error for ${symbol}:`, error || stderr);
+                return resolve(null);
+            }
+            try {
+                const result = JSON.parse(stdout);
+                resolve(result.price || null);
+            } catch (e) {
+                console.error(`[Python Script] JSON Parse Error for ${symbol}:`, e.message);
+                resolve(null);
+            }
+        });
+    });
+};
+
+// 3. Hybrid Orchestrator
+const getLivePrice = async (symbol, exchange = 'NASDAQ') => {
+    const isLocal = process.env.NODE_ENV !== 'production' && !process.env.VERCEL;
+
+    if (isLocal) {
+        // Local: Try Python first, then fall back to Node
+        let price = await getLivePricePython(symbol, exchange);
+        if (price) return price;
+        console.log(`[Hybrid] Python failed for ${symbol}, trying Node fallback...`);
+        return await getLivePriceNode(symbol, exchange);
+    } else {
+        // Production: Try Node first, then fall back to Python
+        let price = await getLivePriceNode(symbol, exchange);
+        if (price) return price;
+        console.log(`[Hybrid] Node failed for ${symbol}, trying Python fallback...`);
+        return await getLivePricePython(symbol, exchange);
     }
 };
 
 // Background Price Update Loop
 const updateAllPrices = async () => {
     try {
-        console.log('[BG] Starting background price update...');
+        console.log('[BG] Starting synchronized price update...');
         const openTrades = await Trade.find({ status: 'Open' });
 
-        for (const trade of openTrades) {
-            const livePrice = await getLivePrice(trade.symbol, trade.exchange);
+        // 1. Group trades by symbol
+        const tradeGroups = openTrades.reduce((acc, trade) => {
+            if (!acc[trade.symbol]) acc[trade.symbol] = [];
+            acc[trade.symbol].push(trade);
+            return acc;
+        }, {});
+
+        // 2. Process each unique symbol exactly once
+        for (const symbol in tradeGroups) {
+            const firstTrade = tradeGroups[symbol][0];
+            const livePrice = await getLivePrice(symbol, firstTrade.exchange);
+
             if (livePrice) {
-                await Trade.findByIdAndUpdate(trade._id, { currentPrice: livePrice });
-                console.log(`[BG] Updated ${trade.symbol}: $${livePrice}`);
+                // 3. Update all trades in this group with the EXACT same price
+                await Trade.updateMany(
+                    { symbol, status: 'Open' },
+                    { currentPrice: livePrice }
+                );
+                console.log(`[BG] Updated ${symbol} (${tradeGroups[symbol].length} trades): $${livePrice}`);
             }
         }
-        console.log('[BG] Background price update completed.');
+        console.log('[BG] Synchronized price update completed.');
     } catch (err) {
         console.error('[BG] Error in background price update:', err.message);
     }
 };
 
-// Run background update every 30 seconds (Disabled on Vercel/Production for Serverless compatibility)
+// Run background update every 1 second (Disabled on Vercel/Production for Serverless compatibility)
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    setInterval(updateAllPrices, 30000);
-    setTimeout(updateAllPrices, 5000);
+    setInterval(updateAllPrices, 1000);
+    setTimeout(updateAllPrices, 2000); // Shorter initial delay for 1-sec mode
 }
 
 // Get all trades with cached data and user interactions
