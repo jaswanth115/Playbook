@@ -107,7 +107,7 @@ router.post('/login', async (req, res) => {
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
         if (!user.isVerified) {
-            return res.status(401).json({ message: 'Your account is not verified. Please verify using the OTP sent to your email.' });
+            return res.status(401).json({ message: 'Your account is not verified. Please verify using the OTP sent to your email or try signing up again.' });
         }
 
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });

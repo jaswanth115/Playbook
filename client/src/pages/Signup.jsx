@@ -8,6 +8,7 @@ const Signup = () => {
   const [step, setStep] = useState(1); // 1: Signup form, 2: OTP verification
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -25,27 +26,33 @@ const Signup = () => {
     }
 
     try {
-      setMessage('Creating account...');
+      setMessage('');
+      setLoading(true);
       await api.post('/auth/signup', formData);
       setStep(2);
-      setMessage('Account created! Please enter the OTP sent to your email.');
+      setOtp('');
+      setError('');
+      setMessage('Account created! Please enter the OTP.');
     } catch (err) {
-      setMessage('');
       setError(err.response?.data?.message || 'Signup failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
+    setLoading(true);
     try {
-      setMessage('Verifying account...');
       await api.post('/auth/verify-signup', { email: formData.email, otp });
       setMessage('Account verified! Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setMessage('');
       setError(err.response?.data?.message || 'Verification failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,8 +64,11 @@ const Signup = () => {
           {step === 1 ? 'Start your trading journey' : 'Verify your email'}
         </p>
 
-        {error && <p className="text-red-500 text-sm text-center bg-red-500/10 py-2 rounded-lg">{error}</p>}
-        {message && <p className="text-accent-cyan text-sm text-center bg-accent-cyan/10 py-2 rounded-lg animate-pulse">{message}</p>}
+        {/* Stable Message Container */}
+        <div className="h-10 flex items-center justify-center">
+          {error && <p className="text-red-500 text-sm text-center bg-red-500/10 py-2 rounded-lg w-full">{error}</p>}
+          {message && <p className="text-accent-cyan text-sm text-center bg-accent-cyan/10 py-2 rounded-lg w-full">{message}</p>}
+        </div>
 
         {step === 1 ? (
           <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
@@ -96,16 +106,17 @@ const Signup = () => {
             />
             <button
               type="submit"
-              className="w-full py-3 px-4 mt-4 text-white rounded-xl font-semibold transition-all"
+              className="w-full py-3 px-4 mt-4 text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              Sign Up
+              {loading ? 'Creating...' : 'Sign Up'}
             </button>
           </form>
         ) : (
           <form className="mt-8 space-y-4" onSubmit={handleVerifyOTP}>
             <input
               type="text"
-              placeholder="Enter 6-digit OTP"
+              placeholder="Enter OTP"
               className="w-full px-4 py-3 bg-white/5 rounded-xl transition-all text-white border border-white/10 text-center text-2xl tracking-[10px] font-bold"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
@@ -114,13 +125,18 @@ const Signup = () => {
             />
             <button
               type="submit"
-              className="w-full py-3 px-4 mt-4 text-white rounded-xl font-semibold transition-all"
+              className="w-full py-3 px-4 mt-4 text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              Verify & Complete
+              {loading ? 'Verifying...' : 'Verify & Complete'}
             </button>
             <button 
               type="button"
-              onClick={() => setStep(1)}
+              onClick={() => {
+                setStep(1);
+                setError('');
+                setMessage('');
+              }}
               className="w-full text-xs text-secondary hover:text-white"
             >
               ← Back to Signup
