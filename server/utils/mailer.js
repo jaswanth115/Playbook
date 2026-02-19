@@ -20,7 +20,7 @@ const getDarkTemplate = (title, content) => `
                 ${content}
             </div>
             <div style="padding: 20px 30px; background-color: #0c0c0c; border-top: 1px solid #222222; text-align: center;">
-                <p style="margin: 0; font-size: 12px; color: #666666;">&copy; 2026 Playbook. All rights reserved.</p>
+                <p style="margin: 0; font-size: 12px; color: #666666;">&copy; 2026 Playbook.</p>
                 <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #222222; font-size: 10px; color: #444444; line-height: 1.4;">
                     <p><b>Disclaimer:</b> This platform does not force, encourage, or require any user to trade stocks.</p>
                     <p>All trade ideas are for informational purposes only and should not be considered financial advice. Users are solely responsible for their own investment decisions.</p>
