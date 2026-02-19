@@ -175,8 +175,9 @@ router.get('/comments/all', authMiddleware, async (req, res) => {
     try {
         const comments = await Comment.find()
             .populate('userId', 'email username')
-            .sort({ createdAt: 1 });
-        res.json(comments);
+            .sort({ createdAt: -1 })
+            .limit(50);
+        res.json(comments.reverse());
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
