@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, memo, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api';
 import StockChart from '../components/StockChart';
 import NumberFlow from '@number-flow/react';
@@ -7,6 +8,160 @@ import TradeForm from '../components/TradeForm';
 import CandleLoader from '../components/CandleLoader';
 import { Heart, TrendingUp, MessageSquare, Plus, LogOut, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+const TradeItem = memo(({ 
+  trade, 
+  activeTab, 
+  isAdmin, 
+  onInteraction, 
+  onSelect, 
+  onClose, 
+  isMostTab 
+}) => {
+  const pnl = trade.status === 'Open' 
+    ? ((trade.currentPrice - trade.entry) / trade.entry * 100)
+    : ((trade.exit - trade.entry) / trade.entry * 100);
+
+  return (
+    <motion.div 
+      layout="position"
+      initial={{ opacity: 0, rotateX: -30, translateZ: -100 }}
+      animate={{ 
+        opacity: 1, 
+        rotateX: 0, 
+        translateZ: 0,
+        transition: { duration: 0.5, ease: "easeOut" }
+      }}
+      exit={{ opacity: 0, rotateX: 30, translateZ: -100 }}
+      transition={{ 
+        layout: { 
+          type: "spring", 
+          stiffness: 180, 
+          damping: 25,
+          mass: 1
+        }
+      }}
+      onClick={() => onSelect({ symbol: trade.symbol, exchange: trade.exchange })}
+      className="group relative flex flex-col md:flex-row items-center justify-between p-6 rounded-2xl border border-white/10 hover:border-white/20 bg-card/50 backdrop-blur-sm cursor-pointer overflow-hidden gap-6 md:gap-0 [transform-style:preserve-3d]"
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      <div className="flex items-center gap-6 z-10 w-full md:w-1/3">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-secondary font-mono mb-1">
+            {trade.status === 'Open' ? 'Bought on' : 'Sold on'} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleDateString()} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+          <h3 className="text-2xl font-bold">{trade.symbol}</h3>
+          <p className="text-xs text-secondary">{trade.name}</p>
+        </div>
+      </div>
+
+      {trade.status === 'Closed' && (
+        <div className="absolute top-4 right-4">
+          <span className="text-[9px] font-bold px-2 py-1 bg-white/10 rounded-md text-secondary uppercase tracking-widest">Closed</span>
+        </div>
+      )}
+
+      <div className="flex flex-1 w-full justify-around items-center z-10 border-y md:border-y-0 border-white/5 py-4 md:py-0">
+        <div className="text-center">
+          <p className="text-[10px] text-secondary uppercase tracking-widest">{trade.status === 'Open' ? 'Bought at' : 'Sold at'}</p>
+          <p className="text-lg font-semibold">{trade.entry}</p>
+          {trade.status === 'Open' && (
+             <p className="text-[10px] text-green-400 flex items-center justify-center gap-1">
+              Live: <NumberFlow value={trade.currentPrice} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
+             </p>
+          )}
+        </div>
+        <div className="text-center">
+          <p className="text-[10px] text-secondary uppercase tracking-widest">P&L</p>
+          <p className={`font-bold flex items-center justify-center ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            <NumberFlow 
+              value={pnl} 
+              format={{ minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'always' }}
+              suffix="%"
+            />
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center md:justify-end gap-6 z-10 w-full md:w-auto">
+        <div className="flex items-center gap-2">
+          {!isMostTab && (
+            <div
+              className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center cursor-pointer ${
+                trade.userInvested
+                  ? 'bg-gradient-to-br from-rose-500 to-pink-500 border-transparent shadow-md'
+                  : 'border-white/10 hover:border-rose-400/50'
+              }`}
+              onClick={(e) => onInteraction(e, trade._id, 'invest')}
+            >
+              <Check
+                size={14}
+                strokeWidth={3}
+                className={trade.userInvested ? 'text-white' : 'text-secondary'}
+              />
+            </div>
+          )}
+          <div>
+            <p className="text-[10px] text-secondary">Invested</p>
+            <p className="text-sm font-bold">
+              <NumberFlow value={trade.investsCount || 0} />
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {!isMostTab && (
+            <div
+              className={`w-8 h-8 rounded-full transition-all flex items-center justify-center cursor-pointer ${
+                trade.userLiked
+                  ? 'bg-rose-500 border-2 border-transparent shadow-md'
+                  : 'border-2 border-white/10 bg-transparent hover:border-rose-400/50'
+              }`}
+              onClick={(e) => onInteraction(e, trade._id, 'like')}
+            >
+              <Heart
+                size={14}
+                className={
+                  trade.userLiked
+                    ? 'text-white fill-white transition-transform duration-150 scale-105'
+                    : 'text-secondary transition-transform duration-150'
+                }
+              />
+            </div>
+          )}
+          <div>
+            <p className="text-[10px] text-secondary">Liked</p>
+            <p className="text-sm font-bold">
+              <NumberFlow value={trade.likesCount || 0} />
+            </p>
+          </div>
+        </div>
+        {isAdmin && trade.status === 'Open' && (
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose(trade);
+            }}
+            className="px-4 py-2 bg-white/10 hover:bg-green-500/20 text-white rounded-lg text-xs"
+          >
+            Close
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+}, (prev, next) => {
+  return (
+    prev.trade.currentPrice === next.trade.currentPrice &&
+    prev.trade.likesCount === next.trade.likesCount &&
+    prev.trade.investsCount === next.trade.investsCount &&
+    prev.trade.userLiked === next.trade.userLiked &&
+    prev.trade.userInvested === next.trade.userInvested &&
+    prev.trade.status === next.trade.status &&
+    prev.activeTab === next.activeTab &&
+    prev.isAdmin === next.isAdmin
+  );
+});
 
 const Home = () => {
   const [trades, setTrades] = useState([]);
@@ -82,7 +237,7 @@ const Home = () => {
     navigate('/login');
   };
 
-  const handleInteraction = async (e, tradeId, type) => {
+  const handleInteraction = useCallback(async (e, tradeId, type) => {
     e.stopPropagation();
     
     // Optimistic Update
@@ -104,14 +259,11 @@ const Home = () => {
 
     try {
       await api.post('/trades/interact', { tradeId, type });
-      // We don't call fetchData() here anymore to keep it snappy
-      // The 2s interval will sync it eventually with ground truth
     } catch (err) {
       console.error('Interaction failed', err);
-      // Revert on error if needed, but for simplicity we let the next fetch fix it
       fetchData();
     }
-  };
+  }, [fetchData]);
 
   const handlePostComment = async () => {
     if (!commentText.trim()) return;
@@ -138,17 +290,19 @@ const Home = () => {
     }
   };
 
-  const filteredTrades = trades.filter(t => {
+  const filteredTrades = useMemo(() => trades.filter(t => {
     if (activeTab === 'Open') return t.status === 'Open';
     if (activeTab === 'Closed') return t.status === 'Closed';
     return true;
-  });
+  }), [trades, activeTab]);
 
-  const sortedTrades = [...filteredTrades].sort((a, b) => {
+  const sortedTrades = useMemo(() => [...filteredTrades].sort((a, b) => {
     if (activeTab === 'Most Liked') return (b.likesCount || 0) - (a.likesCount || 0);
     if (activeTab === 'Most Invested') return (b.investsCount || 0) - (a.investsCount || 0);
     return 0;
-  });
+  }), [filteredTrades, activeTab]);
+
+  const isMostTab = activeTab === 'Most Liked' || activeTab === 'Most Invested';
 
   return (
     <div className="min-h-screen bg-dark text-white flex flex-col">
@@ -238,125 +392,25 @@ const Home = () => {
               <p className="text-[10px] text-secondary/50">Check back later for market updates</p>
             </div>
           ) : (
-            sortedTrades.map((trade) => {
-              const pnl = trade.status === 'Open' 
-                ? ((trade.currentPrice - trade.entry) / trade.entry * 100)
-                : ((trade.exit - trade.entry) / trade.entry * 100);
-              
-              return (
-                <div 
-                  key={trade._id}
-                  onClick={() => setSelectedSymbol({ symbol: trade.symbol, exchange: trade.exchange })}
-                  className="group relative flex flex-col md:flex-row items-center justify-between p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all cursor-pointer overflow-hidden gap-6 md:gap-0"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  <div className="flex items-center gap-6 z-10 w-full md:w-1/3">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-secondary font-mono mb-1">
-                        {trade.status === 'Open' ? 'Bought on' : 'Sold on'} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleDateString()} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                      <h3 className="text-2xl font-bold">{trade.symbol}</h3>
-                      <p className="text-xs text-secondary">{trade.name}</p>
-                    </div>
-                  </div>
-
-                  {trade.status === 'Closed' && (
-                    <div className="absolute top-4 right-4">
-                      <span className="text-[9px] font-bold px-2 py-1 bg-white/10 rounded-md text-secondary uppercase tracking-widest">Closed</span>
-                    </div>
-                  )}
-
-                  <div className="flex flex-1 w-full justify-around items-center z-10 border-y md:border-y-0 border-white/5 py-4 md:py-0">
-                    <div className="text-center">
-                      <p className="text-[10px] text-secondary uppercase tracking-widest">{trade.status === 'Open' ? 'Bought at' : 'Sold at'}</p>
-                      <p className="text-lg font-semibold">{trade.status === 'Open' ? trade.entry : trade.exit}</p>
-                      {trade.status === 'Open' && (
-                         <p className="text-[10px] text-green-400 flex items-center justify-center gap-1">
-                          Live: <NumberFlow value={trade.currentPrice} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
-                         </p>
-                      )}
-                    </div>
-                    <div className="text-center">
-                      <p className="text-[10px] text-secondary uppercase tracking-widest">P&L</p>
-                      <p className={`font-bold flex items-center justify-center ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        <NumberFlow 
-                          value={pnl} 
-                          format={{ minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'always' }}
-                          suffix="%"
-                        />
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center md:justify-end gap-6 z-10 w-full md:w-auto">
-                    <div 
-                      className="flex items-center gap-2 group/btn cursor-pointer"
-                    >
-                      <div
-                        className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center ${
-                          trade.userInvested
-                            ? 'bg-gradient-to-br from-rose-500 to-pink-500 border-transparent shadow-md'
-                            : 'border-white/10 group-hover/btn:border-rose-400/50'
-                        }`}
-                        onClick={(e) => handleInteraction(e, trade._id, 'invest')}
-                      >
-                        <Check
-                          size={14}
-                          strokeWidth={3}
-                          className={trade.userInvested ? 'text-white' : 'text-secondary'}
-                        />
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-secondary">Invested</p>
-                        <p className="text-sm font-bold">
-                          <NumberFlow value={trade.investsCount || 0} />
-                        </p>
-                      </div>
-                    </div>
-                    <div 
-                      className="flex items-center gap-2 group/btn cursor-pointer"
-                    >
-                      <div
-                        className={`w-8 h-8 rounded-full transition-all flex items-center justify-center ${
-                          trade.userLiked
-                            ? 'bg-rose-500 border-2 border-transparent shadow-md'
-                            : 'border-2 border-white/10 bg-transparent group-hover/btn:border-rose-400/50'
-                        }`}
-                        onClick={(e) => handleInteraction(e, trade._id, 'like')}
-                      >
-                        <Heart
-                          size={14}
-                          className={
-                            trade.userLiked
-                              ? 'text-white fill-white transition-transform duration-150 scale-105'
-                              : 'text-secondary transition-transform duration-150'
-                          }
-                        />
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-secondary">Liked</p>
-                        <p className="text-sm font-bold">
-                          <NumberFlow value={trade.likesCount || 0} />
-                        </p>
-                      </div>
-                    </div>
-                    {isAdmin && trade.status === 'Open' && (
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingTrade(trade);
-                          setShowForm(true);
-                        }}
-                        className="px-4 py-2 bg-white/10 hover:bg-green-500/20 text-white rounded-lg text-xs"
-                      >
-                        Close
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })
+            <div className="space-y-6 [perspective:1200px] [transform-style:preserve-3d]">
+              <AnimatePresence mode="popLayout">
+                {sortedTrades.map((trade) => (
+                  <TradeItem 
+                    key={trade._id}
+                    trade={trade}
+                    activeTab={activeTab}
+                    isAdmin={isAdmin}
+                    onInteraction={handleInteraction}
+                    onSelect={setSelectedSymbol}
+                    onClose={(t) => {
+                      setEditingTrade(t);
+                      setShowForm(true);
+                    }}
+                    isMostTab={isMostTab}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
           )}
         </div>
 
