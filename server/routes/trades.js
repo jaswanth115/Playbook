@@ -19,25 +19,16 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const { exec } = require('child_process');
 const path = require('path');
 
-// Helper to fetch price via Python
-const getLivePrice = (symbol, exchange = 'NASDAQ') => {
-    return new Promise((resolve) => {
-        const scriptPath = path.join(__dirname, '..', 'utils', 'fetch_price.py');
-        // Pass exchange as second argument
-        exec(`python "${scriptPath}" "${symbol}" "${exchange}"`, (error, stdout, stderr) => {
-            if (error || stderr) {
-                console.error(`Python Error for ${symbol} (${exchange}):`, error || stderr);
-                return resolve(null);
-            }
-            try {
-                const result = JSON.parse(stdout);
-                resolve(result.price || null);
-            } catch (e) {
-                console.error(`JSON Parse Error for ${symbol}:`, e.message);
-                resolve(null);
-            }
-        });
-    });
+// Helper to fetch price via Node-native yahoo-finance2
+const getLivePrice = async (symbol, exchange = 'NASDAQ') => {
+    try {
+        // yahoo-finance2 automatically handles most exchanges via symbol suffix
+        const result = await yahooFinance.quote(symbol);
+        return result.regularMarketPrice || null;
+    } catch (err) {
+        console.error(`Quote Error for ${symbol}:`, err.message);
+        return null;
+    }
 };
 
 // Background Price Update Loop
@@ -59,10 +50,11 @@ const updateAllPrices = async () => {
     }
 };
 
-// Run background update every 30 seconds
-setInterval(updateAllPrices, 30000);
-// Initial run
-setTimeout(updateAllPrices, 5000);
+// Run background update every 30 seconds (Disabled on Vercel/Production for Serverless compatibility)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    setInterval(updateAllPrices, 30000);
+    setTimeout(updateAllPrices, 5000);
+}
 
 // Get all trades with cached data and user interactions
 router.get('/', authMiddleware, async (req, res) => {
