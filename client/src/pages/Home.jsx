@@ -86,7 +86,7 @@ const TradeItem = memo(({
 
       <div className="flex items-center justify-center md:justify-end gap-6 z-10 w-full md:w-auto">
         <div className="flex items-center gap-2">
-          {!isMostTab && (
+          {!isMostTab && trade.status !== 'Closed' && (
             <div
               className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center cursor-pointer ${
                 trade.userInvested
@@ -110,7 +110,7 @@ const TradeItem = memo(({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!isMostTab && (
+          {!isMostTab && trade.status !== 'Closed' && (
             <div
               className={`w-8 h-8 rounded-full transition-all flex items-center justify-center cursor-pointer ${
                 trade.userLiked
