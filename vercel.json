@@ -19,8 +19,12 @@
             "destination": "server/index.js"
         },
         {
-            "source": "/((?!api|assets|static|favicon.ico).*)",
-            "destination": "/index.html"
+            "source": "/assets/(.*)",
+            "destination": "/client/assets/$1"
+        },
+        {
+            "source": "/((?!api|assets|favicon.ico).*)",
+            "destination": "/client/index.html"
         }
     ]
 }
