@@ -119,7 +119,19 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
                 emails.join(','),
                 `New Trade Alert: ${symbol}`,
                 `A new trade has been posted: ${name} (${symbol}). Entry: $${entry}. Posted at: ${postedTime}`,
-                `<h1>New Trade Posted</h1><p><b>${name} (${symbol})</b></p><p>Entry: $${entry}</p><p>Status: ${status}</p><p>Posted at: ${postedTime}</p>`
+                `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="color: #ffffff; margin: 0;">${symbol}</h2>
+                    <p style="color: #888; margin: 5px 0 0 0;">${name}</p>
+                </div>
+                <div style="background: #222; border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Entry Price</p>
+                    <p style="color: #00f2fe; font-size: 32px; font-weight: bold; margin: 5px 0;">$${entry}</p>
+                    <div style="display: inline-block; padding: 4px 12px; background: #00f2fe20; color: #00f2fe; border-radius: 6px; font-size: 12px; font-weight: bold;">STRATEGY: ${status}</div>
+                </div>
+                <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Posted at: ${postedTime}</p>
+                `,
+                'New Trade Posted'
             );
         }
 
@@ -159,7 +171,22 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
                 emails.join(','),
                 `Trade Updated: ${trade.symbol}`,
                 `Trade ${trade.symbol} has been updated. New Status: ${status}. Updated at: ${closedTime}`,
-                `<h1>Trade Updated</h1><p><b>${trade.name} (${trade.symbol})</b></p><p>New Status: ${status}</p><p>Exit: $${exit || 'N/A'}</p><p>Closed at: ${closedTime}</p>`
+                `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="color: #ffffff; margin: 0;">${trade.symbol}</h2>
+                    <p style="color: #888; margin: 5px 0 0 0;">${trade.name}</p>
+                </div>
+                <div style="background: #222; border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center;">
+                    <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">New Status</p>
+                    <p style="color: #ffffff; font-size: 24px; font-weight: bold; margin: 5px 0;">${status}</p>
+                    ${exit ? `
+                        <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 15px 0 0 0;">Exit Price</p>
+                        <p style="color: #4facfe; font-size: 32px; font-weight: bold; margin: 5px 0;">$${exit}</p>
+                    ` : ''}
+                </div>
+                <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Updated at: ${closedTime}</p>
+                `,
+                'Trade Updated'
             );
         }
 

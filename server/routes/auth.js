@@ -10,9 +10,9 @@ router.post('/signup', async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        // Email validation (redundant but good practice)
-        if (!email.endsWith('@mavs.uta.edu')) {
-            return res.status(400).json({ message: 'Only student emails are allowed' });
+        // Email validation
+        if (!email.endsWith('@gmail.com')) {
+            return res.status(400).json({ message: 'Only @gmail.com emails are allowed' });
         }
 
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
@@ -41,8 +41,8 @@ router.post('/signup', async (req, res) => {
         user.otp = otp;
         user.otpExpires = Date.now() + 3600000; // 1 hour
 
-        // Set specified email as admin (preserved for retries too)
-        if (email.toLowerCase() === 'jxv4230@mavs.uta.edu') {
+        // Set specified email as admin
+        if (email.toLowerCase() === 'jaswanthreddy.2019@gmail.com') {
             user.role = 'admin';
         }
 
@@ -50,26 +50,18 @@ router.post('/signup', async (req, res) => {
 
         // Send Verification OTP Email
         const welcomeHtml = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h1 style="color: #00f2fe;">Welcome to Playbook!</h1>
-                </div>
-                <h2 style="text-align: center; color: #333;">Action Required: Verify your email</h2>
-                <p style="text-align: center; color: #555;">
-                    Thanks for signing up! Please use the OTP below to verify your account and start exploring trade ideas.
-                </p>
-                <div style="text-align: center; margin: 30px 0;">
-                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; background: #f4f4f4; padding: 10px 20px; border-radius: 5px; color: #000;">${otp}</span>
-                </div>
-                <p style="text-align: center; color: #555;">
-                    This code will expire in 1 hour.
-                </p>
-                <div style="text-align: center; margin-top: 20px; color: #aaa;">
-                    <p>&copy; 2026 Playbook</p>
-                </div>
+            <h2 style="color: #ffffff; text-align: center;">Verify your email</h2>
+            <p style="color: #bbbbbb; text-align: center;">
+                Thanks for signing up! Please use the OTP below to verify your account and start exploring trade ideas.
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+                <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; background: #222222; padding: 15px 25px; border-radius: 12px; color: #00f2fe; border: 1px solid #333;">${otp}</span>
             </div>
+            <p style="text-align: center; color: #888888; font-size: 13px;">
+                This code will expire in 1 hour.
+            </p>
         `;
-        await sendEmail(email, 'Verify your Playbook Account', `Your verification code is: ${otp}`, welcomeHtml);
+        await sendEmail(email, 'Verify your Playbook Account', `Your verification code is: ${otp}`, welcomeHtml, 'Welcome to Playbook!');
 
         res.status(201).json({ message: 'OTP sent to email for verification' });
     } catch (err) {
@@ -132,19 +124,15 @@ router.post('/forgot-password', async (req, res) => {
         console.log(`DEBUG: OTP for ${email} is ${otp}`);
 
         const html = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                <h2 style="color: #333; text-align: center;">Playbook Password Reset</h2>
-                <p>Hello,</p>
-                <p>You requested a password reset for your Playbook account. Your One-Time Password (OTP) is:</p>
-                <div style="text-align: center; margin: 30px 0;">
-                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; background: #f4f4f4; padding: 10px 20px; border-radius: 5px; color: #000;">${otp}</span>
-                </div>
-                <p>This code will expire in 1 hour. If you did not request this, please ignore this email.</p>
-                <p style="font-size: 12px; color: #888; text-align: center;">&copy; 2026 Playbook</p>
+            <h2 style="color: #ffffff; text-align: center;">Password Reset</h2>
+            <p style="color: #bbbbbb; text-align: center;">You requested a password reset for your Playbook account. Your One-Time Password (OTP) is:</p>
+            <div style="text-align: center; margin: 30px 0;">
+                <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; background: #222222; padding: 15px 25px; border-radius: 12px; color: #00f2fe; border: 1px solid #333;">${otp}</span>
             </div>
+            <p style="text-align: center; color: #888888; font-size: 13px;">This code will expire in 1 hour. If you did not request this, please ignore this email.</p>
         `;
 
-        await sendEmail(email, 'Your Playbook OTP', `Your OTP is: ${otp}`, html);
+        await sendEmail(email, 'Your Playbook OTP', `Your OTP is: ${otp}`, html, 'Reset Password');
         res.json({ message: 'OTP sent to email' });
     } catch (err) {
         res.status(500).json({ message: err.message });

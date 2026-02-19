@@ -21,8 +21,8 @@ const Signup = () => {
     if (!passwordRegex.test(formData.password)) {
       return setError('Password must be at least 8 characters long and include: 1 uppercase, 1 lowercase, 1 number, and 1 special character.');
     }
-    if (!formData.email.endsWith('@mavs.uta.edu')) {
-      return setError('Enter your school email');
+    if (!formData.email.endsWith('@gmail.com')) {
+      return setError('Enter your gmail address');
     }
 
     try {
