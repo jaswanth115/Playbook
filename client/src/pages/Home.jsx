@@ -293,6 +293,7 @@ const Home = () => {
   const filteredTrades = useMemo(() => trades.filter(t => {
     if (activeTab === 'Open') return t.status === 'Open';
     if (activeTab === 'Closed') return t.status === 'Closed';
+    if (activeTab === 'Most Liked' || activeTab === 'Most Invested') return t.status === 'Open';
     return true;
   }), [trades, activeTab]);
 
