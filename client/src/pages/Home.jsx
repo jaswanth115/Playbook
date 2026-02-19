@@ -49,7 +49,7 @@ const TradeItem = memo(({
       <div className="flex items-center gap-6 z-10 w-full md:w-1/3">
         <div className="flex flex-col">
           <span className="text-[10px] text-secondary font-mono mb-1">
-            {trade.status === 'Open' ? 'Bought on' : 'Sold on'} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleDateString()} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {trade.status === 'Open' ? 'Bought on' : 'Sold on'} {new Date(trade.status === 'Open' ? trade.createdAt : trade.updatedAt).toLocaleString([], { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' })}
           </span>
           <h3 className="text-2xl font-bold">{trade.symbol}</h3>
           <p className="text-xs text-secondary">{trade.name}</p>
@@ -105,7 +105,7 @@ const TradeItem = memo(({
           <div>
             <p className="text-[10px] text-secondary">Invested</p>
             <p className="text-sm font-bold">
-              <NumberFlow value={trade.investsCount || 0} />
+              <NumberFlow value={trade.investsCount || 0} format={{ notation: 'compact', compactDisplay: 'short' }} />
             </p>
           </div>
         </div>
@@ -132,7 +132,7 @@ const TradeItem = memo(({
           <div>
             <p className="text-[10px] text-secondary">Liked</p>
             <p className="text-sm font-bold">
-              <NumberFlow value={trade.likesCount || 0} />
+              <NumberFlow value={trade.likesCount || 0} format={{ notation: 'compact', compactDisplay: 'short' }} />
             </p>
           </div>
         </div>
