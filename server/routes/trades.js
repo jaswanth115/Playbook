@@ -19,6 +19,8 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const { exec } = require('child_process');
 const path = require('path');
 
+const BASE_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173';
+
 // 1. Node-Native method (Primary for Vercel/Production)
 const getLivePriceNode = async (symbol, exchange = 'NASDAQ') => {
     try {
@@ -171,7 +173,7 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
         const trade = new Trade({ symbol, name, exchange, status, entry, exit, postedBy: req.user.id });
         await trade.save();
 
-        const postedTime = new Date(trade.createdAt).toLocaleString();
+        const postedTime = new Date(trade.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
         console.log(`Trade ${symbol} saved successfully`);
 
         // Notify all users
@@ -192,6 +194,9 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
                     <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Entry Price</p>
                     <p style="color: #00f2fe; font-size: 32px; font-weight: bold; margin: 5px 0;">${entry}</p>
                     <div style="display: inline-block; padding: 4px 12px; background: #00f2fe20; color: #00f2fe; border-radius: 6px; font-size: 12px; font-weight: bold;">STATUS: ${status}</div>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="${BASE_URL}/login" style="background: #00f2fe; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Sign In to Check Updates</a>
                 </div>
                 <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Posted at: ${postedTime}</p>
                 `,
@@ -223,7 +228,7 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
             return res.status(404).json({ message: 'Trade not found' });
         }
 
-        const closedTime = new Date(trade.updatedAt).toLocaleString();
+        const closedTime = new Date(trade.updatedAt).toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
         console.log(`Trade ${trade.symbol} updated successfully`);
 
         // Notify all users about update
@@ -247,6 +252,9 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
                         <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 15px 0 0 0;">Exit Price</p>
                         <p style="color: #4facfe; font-size: 32px; font-weight: bold; margin: 5px 0;">${exit}</p>
                     ` : ''}
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="${BASE_URL}/login" style="background: #4facfe; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Sign In to Check Updates</a>
                 </div>
                 <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Updated at: ${closedTime}</p>
                 `,

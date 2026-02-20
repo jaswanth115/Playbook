@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if (!token) {
@@ -9,6 +10,13 @@ const authMiddleware = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Explicitly check if user still exists in DB
+        const userExists = await User.findById(decoded.id).select('_id');
+        if (!userExists) {
+            return res.status(401).json({ message: 'User no longer exists, access denied' });
+        }
+
         req.user = decoded;
         next();
     } catch (err) {
@@ -16,7 +24,6 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-const User = require('../models/User');
 
 const adminMiddleware = async (req, res, next) => {
     try {
