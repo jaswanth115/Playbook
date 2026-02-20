@@ -182,7 +182,7 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
         if (emails.length > 0) {
             console.log(`Sending notifications to ${emails.length} users...`);
             await sendEmail(
-                emails.join(','),
+                process.env.SENDER_MAIL,
                 `New Trade Alert: ${symbol}`,
                 `A new trade has been posted: ${name} (${symbol}). Entry: $${entry}. Posted at: ${postedTime}`,
                 `
@@ -200,7 +200,8 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
                 </div>
                 <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Posted at: ${postedTime}</p>
                 `,
-                'New Trade Posted'
+                'New Trade Posted',
+                emails.join(',')
             );
         }
 
@@ -237,7 +238,7 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
         if (emails.length > 0) {
             console.log(`Sending update notifications to ${emails.length} users...`);
             await sendEmail(
-                emails.join(','),
+                process.env.SENDER_MAIL,
                 `Trade Updated: ${trade.symbol}`,
                 `Trade ${trade.symbol} has been updated. New Status: ${status}. Updated at: ${closedTime}`,
                 `
@@ -258,7 +259,8 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
                 </div>
                 <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Updated at: ${closedTime}</p>
                 `,
-                'Trade Updated'
+                'Trade Updated',
+                emails.join(',')
             );
         }
 

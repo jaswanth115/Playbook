@@ -30,19 +30,25 @@ const getDarkTemplate = (title, content) => `
     </div>
 `;
 
-const sendEmail = async (to, subject, text, htmlContent, title = "Playbook Alert") => {
+const sendEmail = async (to, subject, text, htmlContent, title = "Playbook Alert", bcc = null) => {
     try {
         const fromEmail = process.env.SENDER_MAIL;
         const html = getDarkTemplate(title, htmlContent);
 
-        const info = await transporter.sendMail({
+        const mailOptions = {
             from: `"Playbook" <${fromEmail}>`,
             to,
             subject,
             text,
             html
-        });
-        console.log(`Email sent successfully: ${info.messageId} to ${to}`);
+        };
+
+        if (bcc) {
+            mailOptions.bcc = bcc;
+        }
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`Email sent successfully: ${info.messageId} to ${to}${bcc ? ' (BCC: ' + bcc + ')' : ''}`);
     } catch (error) {
         console.error('CRITICAL: Error sending email via NodeMailer:');
         console.error(error);
