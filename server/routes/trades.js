@@ -107,6 +107,9 @@ const updateAllPrices = async () => {
 };
 
 // Run background update every 1 second (Disabled on Vercel/Production for Serverless compatibility)
+let lastUpdate = 0;
+const THROTTLE_TIME = 120000; // 2 minutes
+
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     setInterval(updateAllPrices, 1000);
     setTimeout(updateAllPrices, 2000); // Shorter initial delay for 1-sec mode
@@ -115,6 +118,13 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
 // Get all trades with cached data and user interactions
 router.get('/', authMiddleware, async (req, res) => {
     try {
+        // Trigger on-demand update in production if throttled
+        if ((process.env.NODE_ENV === 'production' || process.env.VERCEL) && Date.now() - lastUpdate > THROTTLE_TIME) {
+            console.log('[PROD] Triggering on-demand price update...');
+            lastUpdate = Date.now();
+            updateAllPrices().catch(err => console.error('[PROD] On-demand update error:', err.message));
+        }
+
         // 1. Fetch all trades from DB
         const trades = await Trade.find().sort({ createdAt: -1 }).lean();
 
