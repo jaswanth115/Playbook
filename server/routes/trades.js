@@ -73,8 +73,12 @@ const getLivePrice = async (symbol, exchange = 'NASDAQ') => {
     }
 };
 
+let isUpdating = false;
+
 // Background Price Update Loop
 const updateAllPrices = async () => {
+    if (isUpdating) return;
+    isUpdating = true;
     try {
         console.log('[BG] Starting synchronized price update...');
         const openTrades = await Trade.find({ status: 'Open' });
@@ -103,12 +107,14 @@ const updateAllPrices = async () => {
         console.log('[BG] Synchronized price update completed.');
     } catch (err) {
         console.error('[BG] Error in background price update:', err.message);
+    } finally {
+        isUpdating = false;
     }
 };
 
 // Run background update every 1 second (Disabled on Vercel/Production for Serverless compatibility)
 let lastUpdate = 0;
-const THROTTLE_TIME = 120000; // 2 minutes
+const THROTTLE_TIME = 1000; // 1 second
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     setInterval(updateAllPrices, 1000);

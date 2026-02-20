@@ -209,8 +209,8 @@ const Home = () => {
 
   useEffect(() => {
     fetchData();
-    // Refresh every 2 seconds for live data
-    const interval = setInterval(fetchData, 2000);
+    // Refresh every 1 second for live data
+    const interval = setInterval(fetchData, 1000);
     return () => clearInterval(interval);
   }, []);
 
