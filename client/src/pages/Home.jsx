@@ -300,6 +300,7 @@ const Home = () => {
   const sortedTrades = useMemo(() => [...filteredTrades].sort((a, b) => {
     if (activeTab === 'Most Liked') return (b.likesCount || 0) - (a.likesCount || 0);
     if (activeTab === 'Most Invested') return (b.investsCount || 0) - (a.investsCount || 0);
+    if (activeTab === 'Closed') return new Date(b.updatedAt) - new Date(a.updatedAt);
     return 0;
   }), [filteredTrades, activeTab]);
 
