@@ -14,25 +14,21 @@ const TradeForm = ({ trade, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('TradeForm handleSubmit triggered. isEditing:', isEditing);
 
     // If closing, enforce status and exit validation
     if (isEditing) {
       if (!formData.exit) {
-        console.warn('Validation failed: Closed trade requires an exit price.');
         return alert('Please enter a "Sold at" price to close this trade.');
       }
     }
 
     try {
       if (isEditing) {
-        console.log(`Sending PUT request to /trades/${trade._id} to CLOSE`);
         await api.put(`/trades/${trade._id}`, {
           status: 'Closed',
           exit: parseFloat(formData.exit)
         });
       } else {
-        console.log('Sending POST request to /trades as OPEN');
         await api.post('/trades', {
           ...formData,
           status: 'Open',
@@ -40,11 +36,9 @@ const TradeForm = ({ trade, onClose, onSuccess }) => {
         });
       }
       
-      console.log('Request successful!');
       onSuccess();
       onClose();
     } catch (err) {
-      console.error('API Error details:', err.response || err);
       alert(err.response?.data?.message || 'Error saving trade. Check console for details.');
     }
   };

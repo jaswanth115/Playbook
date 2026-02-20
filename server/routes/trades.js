@@ -31,7 +31,6 @@ const getLivePriceNode = async (symbol, exchange = 'NASDAQ') => {
         const result = await yahooFinance.quote(ticker);
         return result.regularMarketPrice || null;
     } catch (err) {
-        console.error(`[Node API] Quote Error for ${symbol}:`, err.message);
         return null;
     }
 };
@@ -42,14 +41,12 @@ const getLivePricePython = (symbol, exchange = 'NASDAQ') => {
         const scriptPath = path.join(__dirname, '..', 'utils', 'fetch_price.py');
         exec(`python "${scriptPath}" "${symbol}" "${exchange}"`, (error, stdout, stderr) => {
             if (error || stderr) {
-                console.error(`[Python Script] Error for ${symbol}:`, error || stderr);
                 return resolve(null);
             }
             try {
                 const result = JSON.parse(stdout);
                 resolve(result.price || null);
             } catch (e) {
-                console.error(`[Python Script] JSON Parse Error for ${symbol}:`, e.message);
                 resolve(null);
             }
         });
@@ -64,13 +61,11 @@ const getLivePrice = async (symbol, exchange = 'NASDAQ') => {
         // Local: Try Python first, then fall back to Node
         let price = await getLivePricePython(symbol, exchange);
         if (price) return price;
-        console.log(`[Hybrid] Python failed for ${symbol}, trying Node fallback...`);
         return await getLivePriceNode(symbol, exchange);
     } else {
         // Production: Try Node first, then fall back to Python
         let price = await getLivePriceNode(symbol, exchange);
         if (price) return price;
-        console.log(`[Hybrid] Node failed for ${symbol}, trying Python fallback...`);
         return await getLivePricePython(symbol, exchange);
     }
 };
@@ -82,7 +77,6 @@ const updateAllPrices = async () => {
     if (isUpdating) return;
     isUpdating = true;
     try {
-        console.log('[BG] Starting synchronized price update...');
         const openTrades = await Trade.find({ status: 'Open' });
 
         // 1. Group trades by symbol
@@ -103,12 +97,9 @@ const updateAllPrices = async () => {
                     { symbol, status: 'Open' },
                     { currentPrice: livePrice }
                 );
-                console.log(`[BG] Updated ${symbol} (${tradeGroups[symbol].length} trades): $${livePrice}`);
             }
         }
-        console.log('[BG] Synchronized price update completed.');
     } catch (err) {
-        console.error('[BG] Error in background price update:', err.message);
     } finally {
         isUpdating = false;
     }
@@ -128,9 +119,8 @@ router.get('/', authMiddleware, async (req, res) => {
     try {
         // Trigger on-demand update in production if throttled
         if ((process.env.NODE_ENV === 'production' || process.env.VERCEL) && Date.now() - lastUpdate > THROTTLE_TIME) {
-            console.log('[PROD] Triggering on-demand price update...');
             lastUpdate = Date.now();
-            updateAllPrices().catch(err => console.error('[PROD] On-demand update error:', err.message));
+            updateAllPrices().catch(err => { });
         }
 
         // 1. Fetch all trades from DB
@@ -168,19 +158,16 @@ router.get('/', authMiddleware, async (req, res) => {
 // Post a trade (Admin only)
 router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
     try {
-        console.log('POST /trades - Request Body:', req.body);
         const { symbol, name, exchange, status, entry, exit } = req.body;
         const trade = new Trade({ symbol, name, exchange, status, entry, exit, postedBy: req.user.id });
         await trade.save();
 
         const postedTime = new Date(trade.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
-        console.log(`Trade ${symbol} saved successfully`);
 
         // Notify all users
         const users = await User.find({}, 'email');
         const emails = users.map(u => u.email);
         if (emails.length > 0) {
-            console.log(`Sending notifications to ${emails.length} users...`);
             // Send individual emails for privacy and personalization
             for (const email of emails) {
                 await sendEmail(
@@ -209,7 +196,6 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
 
         res.status(201).json(trade);
     } catch (err) {
-        console.error('ERROR in POST /trades:', err);
         res.status(500).json({ message: err.message });
     }
 });
@@ -217,7 +203,6 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
 // Update a trade (Admin only)
 router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
     try {
-        console.log(`PUT /trades/${req.params.id} - Request Body:`, req.body);
         const { status, exit } = req.body;
 
         // Validation: Exit price required to close trade
@@ -227,18 +212,15 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
 
         const trade = await Trade.findByIdAndUpdate(req.params.id, { status, exit }, { new: true });
         if (!trade) {
-            console.error(`Trade with ID ${req.params.id} not found`);
             return res.status(404).json({ message: 'Trade not found' });
         }
 
         const closedTime = new Date(trade.updatedAt).toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
-        console.log(`Trade ${trade.symbol} updated successfully`);
 
         // Notify all users about update
         const users = await User.find({}, 'email');
         const emails = users.map(u => u.email);
         if (emails.length > 0) {
-            console.log(`Sending update notifications to ${emails.length} users...`);
             // Send individual emails for privacy and personalization
             for (const email of emails) {
                 await sendEmail(
@@ -270,7 +252,6 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
 
         res.json(trade);
     } catch (err) {
-        console.error(`ERROR in PUT /trades/${req.params.id}:`, err);
         res.status(500).json({ message: err.message });
     }
 });

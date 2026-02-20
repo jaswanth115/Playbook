@@ -30,7 +30,6 @@ router.post('/signup', async (req, res) => {
             user.username = username;
             const hashedPassword = await bcrypt.hash(password, 10);
             user.password = hashedPassword;
-            console.log(`Unverified user ${email} re-signing up. Data overwritten.`);
         } else {
             const hashedPassword = await bcrypt.hash(password, 10);
             user = new User({ username, email, password: hashedPassword });
@@ -121,7 +120,6 @@ router.post('/forgot-password', async (req, res) => {
         user.otpExpires = Date.now() + 3600000; // 1 hour
         await user.save();
 
-        console.log(`DEBUG: OTP for ${email} is ${otp}`);
 
         const html = `
             <h2 style="color: #ffffff; text-align: center;">Password Reset</h2>

@@ -48,10 +48,7 @@ const sendEmail = async (to, subject, text, htmlContent, title = "Playbook Alert
         }
 
         const info = await transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully: ${info.messageId} to ${to}${bcc ? ' (BCC: ' + bcc + ')' : ''}`);
     } catch (error) {
-        console.error('CRITICAL: Error sending email via NodeMailer:');
-        console.error(error);
     }
 };
 

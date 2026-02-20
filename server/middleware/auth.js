@@ -28,7 +28,6 @@ const authMiddleware = async (req, res, next) => {
 const adminMiddleware = async (req, res, next) => {
     try {
         const user = await User.findById(req.user.id);
-        console.log(`Admin Check - User: ${user?.email}, Role: ${user?.role}`);
         if (!user || user.role !== 'admin') {
             return res.status(403).json({ message: 'Access denied, admin only' });
         }

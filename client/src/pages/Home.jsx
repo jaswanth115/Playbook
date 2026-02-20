@@ -200,8 +200,6 @@ const Home = () => {
       setTrades(tradesRes.data.trades);
 
       setComments(commentsRes.data);
-    } catch (err) {
-      console.log('Failed to fetch data', err);
     } finally {
       setLoading(false);
     }
@@ -260,7 +258,6 @@ const Home = () => {
     try {
       await api.post('/trades/interact', { tradeId, type });
     } catch (err) {
-      console.error('Interaction failed', err);
       fetchData();
     }
   }, [fetchData]);
@@ -285,7 +282,6 @@ const Home = () => {
       await api.post('/trades/comment', { comment: commentText });
       // The 2s interval will sync the official ID and data
     } catch (err) {
-      console.error('Failed to post comment', err);
       fetchData(); // Sync if failed
     }
   };

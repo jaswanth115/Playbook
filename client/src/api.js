@@ -20,7 +20,6 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            console.warn('Session invalid or user deleted. Redirecting to login...');
             localStorage.clear();
             window.location.href = '/login';
         }
