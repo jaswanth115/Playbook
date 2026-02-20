@@ -181,28 +181,30 @@ router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
         const emails = users.map(u => u.email);
         if (emails.length > 0) {
             console.log(`Sending notifications to ${emails.length} users...`);
-            await sendEmail(
-                process.env.SENDER_MAIL,
-                `New Trade Alert: ${symbol}`,
-                `A new trade has been posted: ${name} (${symbol}). Entry: $${entry}. Posted at: ${postedTime}`,
-                `
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="color: #ffffff; margin: 0;">${symbol}</h2>
-                    <p style="color: #888; margin: 5px 0 0 0;">${name}</p>
-                </div>
-                <div style="background: #222; border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center;">
-                    <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Entry Price</p>
-                    <p style="color: #00f2fe; font-size: 32px; font-weight: bold; margin: 5px 0;">${entry}</p>
-                    <div style="display: inline-block; padding: 4px 12px; background: #00f2fe20; color: #00f2fe; border-radius: 6px; font-size: 12px; font-weight: bold;">STATUS: ${status}</div>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="${BASE_URL}/login" style="background: #00f2fe; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Sign In to Check Updates</a>
-                </div>
-                <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Posted at: ${postedTime}</p>
-                `,
-                'New Trade Posted',
-                emails.join(',')
-            );
+            // Send individual emails for privacy and personalization
+            for (const email of emails) {
+                await sendEmail(
+                    email,
+                    `New Trade Alert: ${symbol}`,
+                    `A new trade has been posted: ${name} (${symbol}). Entry: $${entry}. Posted at: ${postedTime}`,
+                    `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #ffffff; margin: 0;">${symbol}</h2>
+                        <p style="color: #888; margin: 5px 0 0 0;">${name}</p>
+                    </div>
+                    <div style="background: #222; border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center;">
+                        <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Entry Price</p>
+                        <p style="color: #00f2fe; font-size: 32px; font-weight: bold; margin: 5px 0;">${entry}</p>
+                        <div style="display: inline-block; padding: 4px 12px; background: #00f2fe20; color: #00f2fe; border-radius: 6px; font-size: 12px; font-weight: bold;">STATUS: ${status}</div>
+                    </div>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="${BASE_URL}/login" style="background: #00f2fe; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Sign In to Check Updates</a>
+                    </div>
+                    <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Posted at: ${postedTime}</p>
+                    `,
+                    'New Trade Posted'
+                );
+            }
         }
 
         res.status(201).json(trade);
@@ -237,31 +239,33 @@ router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
         const emails = users.map(u => u.email);
         if (emails.length > 0) {
             console.log(`Sending update notifications to ${emails.length} users...`);
-            await sendEmail(
-                process.env.SENDER_MAIL,
-                `Trade Updated: ${trade.symbol}`,
-                `Trade ${trade.symbol} has been updated. New Status: ${status}. Updated at: ${closedTime}`,
-                `
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="color: #ffffff; margin: 0;">${trade.symbol}</h2>
-                    <p style="color: #888; margin: 5px 0 0 0;">${trade.name}</p>
-                </div>
-                <div style="background: #222; border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center;">
-                    <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">New Status</p>
-                    <p style="color: #ffffff; font-size: 24px; font-weight: bold; margin: 5px 0;">${status}</p>
-                    ${exit ? `
-                        <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 15px 0 0 0;">Exit Price</p>
-                        <p style="color: #4facfe; font-size: 32px; font-weight: bold; margin: 5px 0;">${exit}</p>
-                    ` : ''}
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="${BASE_URL}/login" style="background: #4facfe; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Sign In to Check Updates</a>
-                </div>
-                <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Updated at: ${closedTime}</p>
-                `,
-                'Trade Updated',
-                emails.join(',')
-            );
+            // Send individual emails for privacy and personalization
+            for (const email of emails) {
+                await sendEmail(
+                    email,
+                    `Trade Updated: ${trade.symbol}`,
+                    `Trade ${trade.symbol} has been updated. New Status: ${status}. Updated at: ${closedTime}`,
+                    `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #ffffff; margin: 0;">${trade.symbol}</h2>
+                        <p style="color: #888; margin: 5px 0 0 0;">${trade.name}</p>
+                    </div>
+                    <div style="background: #222; border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center;">
+                        <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 0;">New Status</p>
+                        <p style="color: #ffffff; font-size: 24px; font-weight: bold; margin: 5px 0;">${status}</p>
+                        ${exit ? `
+                            <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 15px 0 0 0;">Exit Price</p>
+                            <p style="color: #4facfe; font-size: 32px; font-weight: bold; margin: 5px 0;">${exit}</p>
+                        ` : ''}
+                    </div>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="${BASE_URL}/login" style="background: #4facfe; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">Sign In to Check Updates</a>
+                    </div>
+                    <p style="text-align: center; color: #555; font-size: 11px; margin-top: 20px;">Updated at: ${closedTime}</p>
+                    `,
+                    'Trade Updated'
+                );
+            }
         }
 
         res.json(trade);
