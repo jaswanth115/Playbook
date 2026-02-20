@@ -19,7 +19,7 @@ const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const { exec } = require('child_process');
 const path = require('path');
 
-const BASE_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173';
+const BASE_URL = process.env.FRONTEND_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173');
 
 // 1. Node-Native method (Primary for Vercel/Production)
 const getLivePriceNode = async (symbol, exchange = 'NASDAQ') => {
