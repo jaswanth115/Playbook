@@ -64,12 +64,16 @@ const TradeItem = memo(({
 
       <div className="flex flex-1 w-full justify-around items-center z-10 border-y md:border-y-0 border-white/5 py-4 md:py-0">
         <div className="text-center">
-          <p className="text-[10px] text-secondary uppercase tracking-widest">{trade.status === 'Open' ? 'Bought at' : 'Sold at'}</p>
+          <p className="text-[10px] text-secondary uppercase tracking-widest">Bought at</p>
           <p className="text-lg font-semibold">{trade.entry}</p>
-          {trade.status === 'Open' && (
+          {trade.status === 'Open' ? (
              <p className="text-[10px] text-green-400 flex items-center justify-center gap-1">
               Live: <NumberFlow value={trade.currentPrice} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
              </p>
+          ) : (
+            <p className="text-[10px] text-secondary flex items-center justify-center gap-1">
+              Sold at: <NumberFlow value={trade.exit} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} />
+            </p>
           )}
         </div>
         <div className="text-center">
